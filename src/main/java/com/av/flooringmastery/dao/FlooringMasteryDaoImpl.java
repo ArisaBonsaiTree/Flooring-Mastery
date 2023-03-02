@@ -2,6 +2,7 @@ package com.av.flooringmastery.dao;
 
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
+import com.av.flooringmastery.dto.Tax;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,17 +14,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
+
     public static final String DELIMITER = ",";
     private final String ORDER_FOLDER = "Orders";
-
-    private Map<String, Product> productMap = new HashMap<>();
+    private final String DATA_FOLDER = "Data";
+    private final String TAX_FILE_NAME = "Taxes.txt";
+    private final String PRODUCT_FILE_NAME = "Products.txt";
 
     private List<Product> products = new ArrayList<>();
 
     // Keep it simple and just put all the orders here
     private Map<Integer, Order> orderMap = new HashMap<>();
+
+    // TODO: PLACE OUR TAX INFO HERE
+    private HashMap<String, Tax> taxMap = new HashMap<>();
+    private Map<String, Product> productMap = new HashMap<>();
 
 
     @Override
@@ -77,7 +85,7 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
 
     @Override
     public List<String> listOfOrders(String dateInput) throws FlooringMasteryNoSuchFileException, FlooringMasteryFileException {
-        File targetFile = locateAndGetFile(dateInput);
+        File targetFile = locateAndGetOrderFile(ORDER_FOLDER, dateInput);
 
         if(targetFile == null) throw new FlooringMasteryNoSuchFileException("No such file exist");
 
@@ -99,8 +107,58 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
         return list;
     }
 
-    private File locateAndGetFile(String dateInput) {
-        File folder = new File(ORDER_FOLDER);
+    @Override
+    public void loadTaxDataIntoHashMap() throws FlooringMasteryFileException,  FlooringMasteryNoSuchFileException{
+        File file = getFileFromFolder(DATA_FOLDER, TAX_FILE_NAME);
+
+        if(!file.exists()) throw new FlooringMasteryNoSuchFileException("No such file called " + TAX_FILE_NAME);
+
+        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
+            String line;
+            reader.readLine(); // Skip the first line that contains our headers
+            while((line = reader.readLine()) != null){
+                String[] fields = line.split(DELIMITER);
+
+                String state = fields[0];
+                String stateName = fields[1];
+                BigDecimal taxRate = new BigDecimal(fields[2]);
+                Tax tax = new Tax(state, stateName, taxRate);
+                taxMap.put(tax.getStateAbbreviation(), tax);
+
+            }
+        }catch (Exception e){
+            throw new FlooringMasteryFileException("File error handling with " + TAX_FILE_NAME);
+        }
+    }
+
+    @Override
+    public void loadProductDataIntoHashMap() throws FlooringMasteryFileException,  FlooringMasteryNoSuchFileException{
+        File file = getFileFromFolder(DATA_FOLDER, PRODUCT_FILE_NAME);
+
+        if(!file.exists()) throw new FlooringMasteryNoSuchFileException("No such fule called " + PRODUCT_FILE_NAME);
+
+        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
+            String line;
+            reader.readLine();
+
+            while((line = reader.readLine()) != null){
+                String[] fields = line.split(DELIMITER);
+                Product product = new Product(fields[0], new BigDecimal(fields[1]), new BigDecimal(fields[2]));
+                productMap.put(product.getProductType(), product);
+            }
+        }catch (Exception e){
+            throw new FlooringMasteryFileException("File error handling with " + PRODUCT_FILE_NAME);
+        }
+    }
+
+    private File getFileFromFolder(String parentFolder, String fileName) {
+        File folder = new File(parentFolder);
+        File file = new File(folder, fileName);
+        return file;
+    }
+
+    private File locateAndGetOrderFile(String folderName, String dateInput) {
+        File folder = new File(folderName);
         File[] files = folder.listFiles();
 
         String targetFileName = "Orders_" + dateInput.replace("/","") + ".txt";

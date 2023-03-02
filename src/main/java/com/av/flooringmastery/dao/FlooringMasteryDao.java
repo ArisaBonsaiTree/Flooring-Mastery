@@ -14,4 +14,8 @@ public interface FlooringMasteryDao {
     Order removeOrder(Product product);
 
     List<String> listOfOrders(String date) throws FlooringMasteryNoSuchFileException, FlooringMasteryFileException;
+
+    void loadTaxDataIntoHashMap() throws FlooringMasteryNoSuchFileException, FlooringMasteryFileException;
+
+    public void loadProductDataIntoHashMap() throws FlooringMasteryFileException,  FlooringMasteryNoSuchFileException;
 }

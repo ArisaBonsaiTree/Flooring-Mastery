@@ -31,11 +31,11 @@ public class FlooringMasteryController {
     public void run() {
         int userChoice;
 
-        try{
-            outer:
-            while (true) {
-                userChoice = getUserSelection();
+        outer:
+        while (true) {
+            userChoice = getUserSelection();
 
+            try{
                 switch (userChoice) {
                     case 1:
                         displayOrders();
@@ -58,19 +58,19 @@ public class FlooringMasteryController {
                     default:
                         io.print("Unknown command");
                 }
+            }catch (Exception e){
+                view.displayErrorMessage(e.getMessage());
+                view.displayErrorMessage("An unseen error has occured!");
             }
-            exitMessage();
         }
-        catch (FlooringMasteryNoSuchFileException e){
-            view.displayErrorMessage(e.getMessage());
-        }
+        exitMessage();
     }
 
     private void exitMessage(){
         view.displayExitBanner();
     }
 
-    private void displayOrders() throws FlooringMasteryNoSuchFileException {
+    private void displayOrders(){
         view.displayDisplayAllBanner();
         String dateInput = view.getOrderDate();
         try {
@@ -88,9 +88,12 @@ public class FlooringMasteryController {
     // TODO: CREATE ORDER!!!!
     private void createOrder(){
         view.displayCreateOrderBanner();
-        Order currentOrder = view.getNewOrderInfo();
 
-        dao.addOrder(currentOrder);
-
+        try{
+            dao.loadTaxDataIntoHashMap();
+        }
+        catch (FlooringMasteryFileException | FlooringMasteryNoSuchFileException e){
+            view.displayErrorMessage(e.getMessage());
+        }
     }
 }
