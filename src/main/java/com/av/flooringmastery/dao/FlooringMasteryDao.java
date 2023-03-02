@@ -12,4 +12,6 @@ public interface FlooringMasteryDao {
     List<Order> getAllOrders();
     Order getOrder(Product product);
     Order removeOrder(Product product);
+
+    List<String> listOfOrders(String date) throws FlooringMasteryNoSuchFileException, FlooringMasteryFileException;
 }

@@ -3,6 +3,9 @@ package com.av.flooringmastery.ui;
 public interface UserIO {
     void print(String msg);
 
+    void printF(String format, Object... args);
+
+    void printEmptyLine();
     double readDouble(String prompt);
 
     double readDouble(String prompt, double min, double max);
@@ -21,5 +24,4 @@ public interface UserIO {
 
     String readString(String prompt);
 
-    public String readDateString(String prompt);
 }

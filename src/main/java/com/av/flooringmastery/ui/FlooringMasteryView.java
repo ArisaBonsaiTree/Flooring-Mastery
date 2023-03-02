@@ -52,8 +52,53 @@ public class FlooringMasteryView {
     }
 
     public String getOrderDate() {
-        return io.readDateString("Please enter the order date:");
+        return io.readString("Enter a date [MM/DD/YYYY or MMDDYYYY]: ");
     }
 
 
+
+
+    public void displayAllOrderList(List<String> listOfOrders) {
+        if(listOfOrders.size() <= 1){
+            io.print("No orders in this file");
+            return;
+        }
+
+        String[] header = listOfOrders.get(0).split(",");
+        for (String column : header) {
+            io.printF("%20s", centerText(column, 20));
+        }
+        io.printEmptyLine();
+
+        // Print the data rows
+        for (int i = 1; i < listOfOrders.size(); i++) {
+            String[] row = listOfOrders.get(i).split(",");
+            for (String column : row) {
+                io.printF("%20s", centerText(column, 20));
+            }
+            io.printEmptyLine();
+        }
+        io.readString("Press any key to continue");
+    }
+
+
+    private String centerText(String text, int width) {
+        if (width <= text.length()) {
+            return text;
+        }
+        int padding = width - text.length();
+        int leftPadding = padding / 2;
+        int rightPadding = padding - leftPadding;
+
+        return String.format("%s%s%s", " ".repeat(leftPadding), text, " ".repeat(rightPadding));
+    }
+
+    public void displayErrorMessage(String errorMessage) {
+        io.print("=== ERROR ===");
+        io.print(errorMessage);
+    }
+
+    public void displayExitBanner() {
+        io.print("Good Bye!!!");
+    }
 }

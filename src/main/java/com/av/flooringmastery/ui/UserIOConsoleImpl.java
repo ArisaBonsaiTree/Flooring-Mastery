@@ -25,6 +25,16 @@ public class UserIOConsoleImpl implements UserIO {
         System.out.println(msg);
     }
 
+    @Override
+    public void printF(String format, Object... args) {
+        System.out.print(String.format(format, args));
+    }
+
+    @Override
+    public void printEmptyLine() {
+        System.out.println();
+    }
+
     /**
      * A simple method that takes in a message to display on the console,
      * and then waits for an answer from the user to return.
@@ -199,23 +209,6 @@ public class UserIOConsoleImpl implements UserIO {
             result = readDouble(msgPrompt);
         } while (result < min || result > max);
         return result;
-    }
-
-    @Override
-    public String readDateString(String prompt){
-
-        String orderDateString = this.readString(prompt);
-
-        String fileName = "Order_" + orderDateString + ".txt";
-        Path filePath = Paths.get(ORDER_DIR, fileName).toAbsolutePath();
-
-        System.out.println("Does file path exist?");
-        System.out.println(Path.of(fileName));
-        // TODO: CUSTOM EXCEPTION
-        if(!filePath.toFile().exists()){
-            throw new RuntimeException();
-        }
-        return filePath.toString();
     }
 }
 
