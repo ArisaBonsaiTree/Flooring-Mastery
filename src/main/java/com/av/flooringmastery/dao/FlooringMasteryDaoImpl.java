@@ -100,7 +100,10 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
             String line;
 
             while ((line = reader.readLine()) != null) {
-                list.add(line);
+                if(!line.contains("-")){
+                    list.add(line);
+                }
+
             }
 
             reader.close();
