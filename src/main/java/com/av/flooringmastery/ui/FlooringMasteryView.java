@@ -1,9 +1,12 @@
 package com.av.flooringmastery.ui;
 
 import com.av.flooringmastery.dto.Order;
+import com.av.flooringmastery.dto.Product;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FlooringMasteryView {
 
@@ -33,19 +36,6 @@ public class FlooringMasteryView {
     public void displayCreateOrderBanner() {
     }
 
-    // TODO: IMPLEMENT LATER
-    public Order getNewOrderInfo() {
-        int orderNumber = orderId++; // Increment it after
-
-        String customerName = io.readString("Your name");
-        // TODO: Users will only input CustomerName(Must be valid), State, Product Type, and AREA
-
-        // TODO: Create a STATE file to load the data!
-        // For state we will need to verify there is a tax code!
-        String state = io.readString("State? (Abbreviations/Full Name)");
-        return null;
-
-    }
 
     public void displayDisplayAllBanner() {
         io.print("=== Display All Orders");
@@ -58,8 +48,43 @@ public class FlooringMasteryView {
 
 
 
+    public void displayAllProducts(Map<String, Product> listOfProducts){
+        String[] header = {"ProductType", "CostPerSquareFoot" , "LaborCostPerSquareFoot"};
+        for(String column: header){
+            io.printF("%20s", centerText(column, 20));
+        }
+
+        io.printEmptyLine();
+
+
+        for(String s: listOfProducts.keySet()){
+            Product product = listOfProducts.get(s);
+
+            io.printF("%20s", centerText(product.getProductType(), 20));
+            io.printF("%20s", centerText(product.getCostPerSquareFoot().toString(), 20));
+            io.printF("%20s", centerText(product.getLaborCostPerSquareFoot().toString(), 20));
+            io.printEmptyLine();
+        }
+    }
+
+    // TODO: Print order summary
+    public void printOrderSummary(Order order){
+        io.printF("%20s", centerText("Order Number", 20));
+        io.printF("%20s", centerText("Customer Name", 20));
+        io.printF("%20s", centerText("Product Type", 20));
+        io.printF("%20s", centerText("Total ($/USD)", 20));
+        io.printEmptyLine();
+        io.printF("%20s", centerText(order.getOrderNumber().toString(), 20));
+        io.printF("%20s", centerText(order.getCustomerName(), 20));
+        io.printF("%20s", centerText(order.getProductType(), 20));
+        io.printF("%20s", centerText(order.getTotal().toString(), 20));
+        io.printEmptyLine();
+    }
+
+
+
     public void displayAllOrderList(List<String> listOfOrders) {
-        if(listOfOrders.size() <= 1){
+        if (listOfOrders.size() <= 1) {
             io.print("No orders in this file");
             return;
         }
@@ -94,11 +119,24 @@ public class FlooringMasteryView {
     }
 
     public void displayErrorMessage(String errorMessage) {
-        io.print("=== ERROR ===");
-        io.print(errorMessage);
+        io.error("=== ERROR ===");
+        io.error(errorMessage);
+        io.error("=== +++++ ===");
     }
 
     public void displayExitBanner() {
         io.print("Good Bye!!!");
+    }
+
+    public void displayCreateSuccessBanner() {
+        io.readString("Order successfully placed. Please hit enter to continue");
+    }
+
+    public void displayOrderNotPlacedBanner() {
+        io.print("Order NOT Placed!");
+    }
+
+    public void displayOrderPlacedBanner() {
+        io.print("Order Placed!");
     }
 }

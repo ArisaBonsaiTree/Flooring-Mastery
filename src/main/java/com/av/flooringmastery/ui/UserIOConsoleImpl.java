@@ -1,12 +1,14 @@
 package com.av.flooringmastery.ui;
 
+import com.av.flooringmastery.dto.Order;
+
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Scanner;
+import java.util.*;
 
 public class UserIOConsoleImpl implements UserIO {
     final private Scanner console = new Scanner(System.in);
@@ -23,6 +25,28 @@ public class UserIOConsoleImpl implements UserIO {
     @Override
     public void print(String msg) {
         System.out.println(msg);
+    }
+
+    @Override
+    public void error(String msg){
+        System.err.println(msg);
+    }
+
+
+
+
+    @Override
+    public String printHashSet(Set<String> set){
+        StringBuilder sb = new StringBuilder();
+        for (String key : set) {
+            sb.append(key).append(", ");
+        }
+
+        if(sb.length() > 0){
+            sb.setLength(sb.length() - 2);
+        }
+
+        return sb.toString();
     }
 
     @Override
@@ -46,6 +70,12 @@ public class UserIOConsoleImpl implements UserIO {
     public String readString(String msgPrompt) {
         System.out.println(msgPrompt);
         return console.nextLine();
+    }
+
+    @Override
+    public BigDecimal readBigDecimal(String prompt){
+        System.out.println(prompt);
+        return console.nextBigDecimal();
     }
 
     /**

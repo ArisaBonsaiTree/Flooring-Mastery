@@ -1,7 +1,14 @@
 package com.av.flooringmastery.ui;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Set;
+
 public interface UserIO {
+
     void print(String msg);
+
+    void error(String msg);
 
     void printF(String format, Object... args);
 
@@ -23,5 +30,11 @@ public interface UserIO {
     long readLong(String prompt, long min, long max);
 
     String readString(String prompt);
+
+    BigDecimal readBigDecimal(String prompt);
+
+    String printHashSet(Set<String> set);
+
+
 
 }

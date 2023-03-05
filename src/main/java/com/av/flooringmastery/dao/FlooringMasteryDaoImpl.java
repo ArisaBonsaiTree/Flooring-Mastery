@@ -10,19 +10,19 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.function.Function;
 
-public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
+public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
 
     public static final String DELIMITER = ",";
     private final String ORDER_FOLDER = "Orders";
     private final String DATA_FOLDER = "Data";
     private final String TAX_FILE_NAME = "Taxes.txt";
     private final String PRODUCT_FILE_NAME = "Products.txt";
+    private final String DATE_FORMAT = "MMddyy";
 
     private List<Product> products = new ArrayList<>();
 
@@ -40,6 +40,10 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
         return newOrder;
     }
 
+    @Override
+    public Map<String, Product> getProductMap(){
+        return productMap;
+    }
     @Override
     public List<Order> getAllOrders() {
         return new ArrayList(orderMap.values());
@@ -79,7 +83,7 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
         }
     }
 
-    public List<Product> getProductArray(){
+    public List<Product> getProductArray() {
         return new ArrayList(products);
     }
 
@@ -87,7 +91,7 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
     public List<String> listOfOrders(String dateInput) throws FlooringMasteryNoSuchFileException, FlooringMasteryFileException {
         File targetFile = locateAndGetOrderFile(ORDER_FOLDER, dateInput);
 
-        if(targetFile == null) throw new FlooringMasteryNoSuchFileException("No such file exist");
+        if (targetFile == null) throw new FlooringMasteryNoSuchFileException("No such file exist");
 
         ArrayList<String> list = new ArrayList<>();
 
@@ -95,28 +99,35 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
             BufferedReader reader = new BufferedReader(new FileReader(targetFile));
             String line;
 
-            while((line = reader.readLine()) != null){
+            while ((line = reader.readLine()) != null) {
                 list.add(line);
             }
 
             reader.close();
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new FlooringMasteryFileException("Error with file handling");
         }
 
         return list;
     }
 
+
+
     @Override
-    public void loadTaxDataIntoHashMap() throws FlooringMasteryFileException,  FlooringMasteryNoSuchFileException{
+    public void loadDataIntoHashMaps() throws FlooringMasteryFileException, FlooringMasteryNoSuchFileException {
+        loadProductDataIntoHashMap();
+        loadTaxDataIntoHashMap();
+    }
+
+    private void loadTaxDataIntoHashMap() throws FlooringMasteryFileException, FlooringMasteryNoSuchFileException {
         File file = getFileFromFolder(DATA_FOLDER, TAX_FILE_NAME);
 
-        if(!file.exists()) throw new FlooringMasteryNoSuchFileException("No such file called " + TAX_FILE_NAME);
+        if (!file.exists()) throw new FlooringMasteryNoSuchFileException("No such file called " + TAX_FILE_NAME);
 
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             reader.readLine(); // Skip the first line that contains our headers
-            while((line = reader.readLine()) != null){
+            while ((line = reader.readLine()) != null) {
                 String[] fields = line.split(DELIMITER);
 
                 String state = fields[0];
@@ -124,29 +135,27 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
                 BigDecimal taxRate = new BigDecimal(fields[2]);
                 Tax tax = new Tax(state, stateName, taxRate);
                 taxMap.put(tax.getStateAbbreviation(), tax);
-
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new FlooringMasteryFileException("File error handling with " + TAX_FILE_NAME);
         }
     }
 
-    @Override
-    public void loadProductDataIntoHashMap() throws FlooringMasteryFileException,  FlooringMasteryNoSuchFileException{
+    private void loadProductDataIntoHashMap() throws FlooringMasteryFileException, FlooringMasteryNoSuchFileException {
         File file = getFileFromFolder(DATA_FOLDER, PRODUCT_FILE_NAME);
 
-        if(!file.exists()) throw new FlooringMasteryNoSuchFileException("No such fule called " + PRODUCT_FILE_NAME);
+        if (!file.exists()) throw new FlooringMasteryNoSuchFileException("No such file called " + PRODUCT_FILE_NAME);
 
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             reader.readLine();
 
-            while((line = reader.readLine()) != null){
+            while ((line = reader.readLine()) != null) {
                 String[] fields = line.split(DELIMITER);
                 Product product = new Product(fields[0], new BigDecimal(fields[1]), new BigDecimal(fields[2]));
                 productMap.put(product.getProductType(), product);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new FlooringMasteryFileException("File error handling with " + PRODUCT_FILE_NAME);
         }
     }
@@ -161,15 +170,69 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao{
         File folder = new File(folderName);
         File[] files = folder.listFiles();
 
-        String targetFileName = "Orders_" + dateInput.replace("/","") + ".txt";
+        String targetFileName = "Orders_" + dateInput.replace("/", "") + ".txt";
         File targetFile = null;
 
-        for(File file: files){
-            if(file.isFile() && file.getName().equals(targetFileName)){
+        for (File file : files) {
+            if (file.isFile() && file.getName().equals(targetFileName)) {
                 targetFile = file;
                 break;
             }
         }
         return targetFile;
+    }
+
+
+    public String getDate(boolean isTomorrow) {
+        LocalDate date = LocalDate.now();
+        if (isTomorrow) {
+            date = date.plusDays(1);
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        return date.format(formatter);
+    }
+
+    @Override
+    public boolean isValidState(String stateName) {
+        return taxMap.containsKey(stateName.toUpperCase());
+    }
+
+    @Override
+    public boolean isValidProductType(String productName){
+        return productMap.containsKey(productName.substring(0, 1).toUpperCase() + productName.substring(1));
+    }
+
+    @Override
+    public boolean isValidCustomerName(String name) {
+        if (name == null || name.isEmpty()) {
+            return false;
+        }
+
+        String regex = "^[a-zA-Z0-9.,\\s]+$";
+        return name.matches(regex);
+    }
+
+    @Override
+    public Product getProduct(String productKey) {
+        return productMap.get(productKey);
+    }
+
+    @Override
+    public Tax getTax(String stateKey) {
+        return taxMap.get(stateKey);
+    }
+
+    @Override
+    public Set<String> getHashMapKeysAsSet(HashMap<String, ?> map) {
+        Set<String> keySet = map.keySet();
+        String[] keyArray = keySet.toArray(new String[keySet.size()]);
+        return new HashSet<>(Arrays.asList(keyArray));
+    }
+
+    @Override
+    public Set<String> getStateMapKeysAsSet() {
+        Set<String> keySet = taxMap.keySet();
+        String[] keyArray = keySet.toArray(new String[keySet.size()]);
+        return new HashSet<>(Arrays.asList(keyArray));
     }
 }
