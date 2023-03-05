@@ -1,2 +1,4 @@
 OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total
 9,Acme,TX,4.45,Wood,100,5.15,4.75,515.00,475.00,44.06,1034.06
+10,acme,TX,4.45,Wood,150,5.15,4.75,772.50,712.50,66.08,1551.08
+11,LaPlus Darkness,KY,6.00,Tile,600,3.50,4.15,2100.00,2490.00,275.40,4865.40
