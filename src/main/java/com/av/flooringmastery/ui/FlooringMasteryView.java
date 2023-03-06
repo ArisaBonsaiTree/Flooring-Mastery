@@ -194,4 +194,34 @@ public class FlooringMasteryView {
     public void displayDeleteOrderBanner() {
         io.print("=== Adding an Order ===");
     }
+
+    public void displayEditOrderBanner() {
+        io.print("=== Editing an Order ===");
+    }
+
+    public Order getEditInfo(Order order, Set<String> statesWeDoService, Map<String, Product> productsWeOffer) {
+        io.print("Just type nothing and press 'Enter' if you don't want to edit the value");
+
+        io.print("Customer Name: " + order.getCustomerName());
+        String customerName = io.readString("Enter a new customer name").trim();
+
+        io.print("Current State: " + order.getState());
+        io.printF("States we do business in: [%s]\n", io.printHashSet(statesWeDoService));
+        String state = io.readString("Enter a new state");
+        state = state.toUpperCase();
+
+        io.print("Product type: " + order.getProductType());
+        displayAllProducts(productsWeOffer);
+
+        String product = io.readString("Enter a new product type");
+        if(product.length() > 1){
+            product = product.substring(0, 1).toUpperCase() + product.substring(1).toLowerCase();
+        }
+
+
+        io.print("Area: " + order.getArea());
+        String area = io.readString("Enter a new area");
+
+        return new Order(customerName, state, product, area, true);
+    }
 }

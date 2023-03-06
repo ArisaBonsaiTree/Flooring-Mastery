@@ -16,6 +16,10 @@ public class Order {
     private final String FILE_LOCATION = "Data/Products.txt";
     private final String DELIMITER = ",";
 
+    private final int EMPTY_DEFAULT_VALUE = -999;
+    private final int BAD_DEFAULT_VALUE = -1;
+
+
     private Integer orderNumber;
     private String orderDate;
     private String customerName;
@@ -37,6 +41,28 @@ public class Order {
         // Default gang
     }
 
+    public Order(String customerName, String state, String productType, String area, boolean editOrder) {
+        this.customerName = customerName;
+        this.state = state;
+        this.productType = productType;
+        BigDecimal bigDecimalArea = null;
+        area = area.trim();
+        // If we give it an empty value, this means we don't want to edit it, so set it to -999
+        if(area.length() == 0){
+            bigDecimalArea = BigDecimal.valueOf(EMPTY_DEFAULT_VALUE); // -999 is bad!!!
+        }
+        // IF we pass  a value, attempt to convert it. If we can't convert it, turn to -1
+        else{
+            try{
+                bigDecimalArea = new BigDecimal(area);
+            }catch (NumberFormatException e){
+                bigDecimalArea = BigDecimal.valueOf(BAD_DEFAULT_VALUE); // -1 is bad!!!
+            }
+        }
+
+        this.area = bigDecimalArea;
+    }
+
     public Order(String customerName, String state, String productType, String area) {
         this.customerName = customerName;
         this.state = state;
@@ -47,7 +73,7 @@ public class Order {
         try{
             bigDecimalArea = new BigDecimal(area);
         }catch (NumberFormatException e){
-            bigDecimalArea = BigDecimal.valueOf(-1);
+            bigDecimalArea = BigDecimal.valueOf(-1); // -1 is bad!!!
         }
 
         this.area = bigDecimalArea;

@@ -1,2 +1,2 @@
 OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total
-13,acme,CA,25.00,Tile,100,3.50,4.15,350.00,415.00,191.25,956.25
+13,Fauna,TX,4.45,Carpet,100000,2.25,2.10,225000.00,210000.00,19357.50,454357.50

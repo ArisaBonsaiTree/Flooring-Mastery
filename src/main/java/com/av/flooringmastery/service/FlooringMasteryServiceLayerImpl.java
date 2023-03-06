@@ -1,5 +1,6 @@
 package com.av.flooringmastery.service;
 
+import com.av.flooringmastery.dao.FlooringMasteryBadDataException;
 import com.av.flooringmastery.dao.FlooringMasteryDao;
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
@@ -81,6 +82,98 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
         );
 
         appendOrderToFile(newOrder.getOrderDate(), orderDetails, newOrder.getOrderNumber());
+    }
+
+    @Override
+    public Order editOrder(String dateInput, String orderNumber) throws FlooringMasteryException {
+        if (!isDateValid(dateInput)) throw new FlooringMasteryException("Invalid date");
+        dao.setOrdersByDate(opensOrderFileAndInsertIntoLinkedHashMap(dateInput));
+
+        LinkedHashMap<String, Order> orderMap = dao.getOrdersByDate();
+
+        Order editOrder = orderMap.get(orderNumber.toString());
+        if(editOrder == null) throw new FlooringMasteryException("Please enter a positive value and minimum order is 100 sq ft");
+
+        return editOrder;
+    }
+
+
+    @Override
+    public void editMapAndOverride(Order editOrder, String dateInput) throws FlooringMasteryException {
+        // Override the map
+        LinkedHashMap<String, Order> orderLinkedHashMap = dao.getOrdersByDate();
+        orderLinkedHashMap.put(editOrder.getOrderNumber().toString(), editOrder);
+        String fileName = String.format("%s/Orders_%s%s", ORDER_DIR, dateInput, ".txt");
+        File orderFile = new File(fileName);
+
+        try(FileWriter fileWriter = new FileWriter(orderFile)){
+            fileWriter.write(ORDER_HEADER);
+            fileWriter.write(System.lineSeparator());
+
+            for(Order order: orderLinkedHashMap.values()){
+                String orderDetails = String.format("%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+                        order.getOrderNumber(),
+                        order.getCustomerName(),
+                        order.getState(),
+                        order.getTaxRate(),
+                        order.getProductType(),
+                        order.getArea(),
+                        order.getCostPerSquareFoot(),
+                        order.getLaborCostPerSquareFoot(),
+                        order.getMaterialCost(),
+                        order.getLaborCost(),
+                        order.getTax(),
+                        order.getTotal()
+                );
+
+                fileWriter.write(orderDetails);
+                fileWriter.write(System.lineSeparator());
+            }
+        }
+        catch (IOException e) {
+            throw new FlooringMasteryException("Problem editing the data");
+        }
+    }
+
+    @Override
+    public Order compareAndEdit(Order editOrder, Order newOrderData) throws FlooringMasteryException {
+        // We should first check if empty --> THEN CHECK THE EDIT
+        if(!newOrderData.getCustomerName().isEmpty()){
+            if(!isValidCustomerName(newOrderData.getCustomerName())) throw new FlooringMasteryException("Name is limited to characters [a-zA-Z][0-9], periods, and comma");
+            editOrder.setCustomerName(newOrderData.getCustomerName());
+        }
+
+        if(!newOrderData.getState().isEmpty()){
+            if(!isValidState(newOrderData.getState())) throw new FlooringMasteryException("We don't do business with " + newOrderData.getState());
+            editOrder.setState(newOrderData.getState());
+        }
+
+        if(!newOrderData.getProductType().isEmpty()){
+            if(!isValidProductName(newOrderData.getProductType())) throw new FlooringMasteryException("No such product named " + newOrderData.getProductType());
+            editOrder.setProductType(newOrderData.getProductType());
+        }
+
+        // If our big decimal equals -999, we gave it nothing so DONT EDIT it
+        if(newOrderData.getArea().equals(new BigDecimal(-999))) System.out.println("IDK");
+
+        // If we have an area that is less than our threshhold AND it's not -999!
+        if(!isValidArea(newOrderData.getArea()) && newOrderData.getArea().compareTo(new BigDecimal(-999)) != 0){
+            throw new FlooringMasteryException("Bad area input: " + newOrderData.getArea());
+        }
+
+        if(isValidArea(newOrderData.getArea())){
+            editOrder.setArea(newOrderData.getArea());
+        }
+        return editOrder;
+    }
+
+    @Override
+    public Order computeNewCost(Order orderToBeEdited) {
+        Product product = dao.getProduct(orderToBeEdited.getProductType());
+        Tax tax = dao.getTax(orderToBeEdited.getState());
+
+        return new Order(orderToBeEdited.getOrderNumber(), orderToBeEdited.getCustomerName(), tax.getStateAbbreviation(), tax.getTaxRate(), product.getProductType(), orderToBeEdited.getArea(), product.getCostPerSquareFoot(), product.getLaborCostPerSquareFoot());
+
     }
 
     @Override

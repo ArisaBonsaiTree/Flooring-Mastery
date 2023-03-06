@@ -1,7 +1,9 @@
 package com.av.flooringmastery.service;
 
+import com.av.flooringmastery.dao.FlooringMasteryBadDataException;
 import com.av.flooringmastery.dto.Order;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -20,4 +22,12 @@ public interface FlooringMasteryServiceLayer {
     Order deleteOrder(String dateInput, String orderNumber) throws FlooringMasteryException;
 
     void deleteOrder(Order deletedOrder, String dateInput) throws FlooringMasteryException;
+
+    Order editOrder(String dateInput, String orderNumber) throws FlooringMasteryException;
+
+    Order compareAndEdit(Order editOrder, Order newOrderData) throws FlooringMasteryException;
+
+    Order computeNewCost(Order orderToBeEdited);
+
+    void editMapAndOverride(Order editOrder, String dateInput) throws FlooringMasteryException;
 }
