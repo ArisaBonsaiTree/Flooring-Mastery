@@ -40,7 +40,7 @@ public class FlooringMasteryView {
     }
 
     public String getOrderDate() {
-        return io.readString("Enter a date [MM/DD/YYYY or MMDDYYYY]: ");
+        return io.readString("Enter a date MMDDYYYY]: ");
     }
 
     public String getOrderNumber(){

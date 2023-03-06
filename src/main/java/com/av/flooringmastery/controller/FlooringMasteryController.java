@@ -106,7 +106,6 @@ public class FlooringMasteryController {
                 deleteOrder(orderMap, dateInput);
                 orderDeletedMessage();
                 return;
-
             }
 
             orderNotDeletedMessage();
@@ -123,62 +122,139 @@ public class FlooringMasteryController {
         view.displayOrderDeletedBanner();
     }
 
-    private void editOrder() {
+    // TODO: HOLD UP !!!!!!
+    private void editOrder() throws FlooringMasteryFileException {
+        String dateInput = null;
+        String orderNumber = null;
+        Order editOrder;
+        try {
+            dao.loadDataIntoHashMaps();
+            dateInput = view.getOrderDate();
+            orderNumber = view.getOrderNumber();
+
+            dao.setOrdersByDate(dateInput);
+
+            LinkedHashMap<String, Order> orderMap = dao.getOrdersByDate();
+            editOrder = orderMap.get(orderNumber);
+
+            io.print("Just type nothing and press 'Enter' if you don't want to edit the value");
+            io.print("Customer Name: " + editOrder.getCustomerName());
+
+            String customerName = io.readString("Enter a new customer name").trim();
+            if (!customerName.isEmpty()) { // If it's NOT EMPTY
+                // It's not empty, so we should validate it
+                if (!dao.isValidCustomerName(customerName)){
+                    throw new FlooringMasteryBadDataException("Name is limited to characters [a-zA-Z][0-9], periods, and comma");
+                }
+
+
+                editOrder.setCustomerName(customerName);
+            }
+
+            // TODO: Perhaps list all choices?
+            io.print("Current State: " + editOrder.getState());
+
+            Set<String> states = dao.getStateMapKeysAsSet();
+            io.printF("States we do business with: [%s]\n", io.printHashSet(states));
+
+            String state = io.readString("Enter a new state").trim();
+            if (!state.isEmpty()) {
+                if (!dao.isValidState(state)){
+                    throw new FlooringMasteryBadDataException("We don't do business with " + state);
+                }
+                editOrder.setState(state);
+            }
+
+
+            // TODO: Perhaps list all the options
+            io.print("Product type: " + editOrder.getProductType());
+
+            Map<String, Product> listOfProducts = dao.getProductMap();
+            view.displayAllProducts(listOfProducts);
+
+            String productType = io.readString("Enter a new product type").trim();
+            if (!productType.isEmpty()) {
+                if (!dao.isValidProductType(productType)){
+                    throw new FlooringMasteryBadDataException("No such product named " + productType.substring(0, 1).toUpperCase() + productType.substring(1));
+                }
+                editOrder.setProductType(productType);
+            }
+
+            io.print("Area: " + editOrder.getArea());
+            String area = io.readString("Enter a new area").trim();
+            if (!area.isEmpty()) {
+                if (area.compareTo(String.valueOf(BigDecimal.ZERO)) < 0 || area.compareTo(String.valueOf(new BigDecimal("100"))) < 0)
+                    throw new FlooringMasteryBadDataException("Please enter a positive value and minimum order is 100 sq ft.");
+                editOrder.setArea(new BigDecimal(area));
+            }
+
+            // TODO: WE NEED TO VERIFY AND PRINT OPTIONS!!!!
+
+            Product product = dao.getProduct(editOrder.getProductType().substring(0, 1).toUpperCase() + editOrder.getProductType().substring(1));
+
+            Tax tax = dao.getTax(editOrder.getState().toUpperCase().replaceAll("\\s", ""));
+            Order newEdit = editNewCost(editOrder.getCustomerName(), product, tax, editOrder.getArea(), editOrder.getOrderNumber());
+
+
+
+
+            // Display Order before we touch it
+            view.printOrderSummary(newEdit);
+
+            String userConfirmation = io.readString("If you want to edit the order, type 'y', else any other input will cancel the order");
+
+            if (userConfirmation.equalsIgnoreCase("y")) {
+
+                // TODO: EDIT THE ORDER
+                orderMap.put(orderNumber, editOrder);
+                editOrder(orderMap, dateInput);
+//                placeOrder(order);
+
+                orderEditedMessage();
+                return;
+            }
+            orderNotEditedMessage();
+
+
+        }catch (Exception e){
+            throw new FlooringMasteryFileException("Bad");
+        }
 
     }
 
-    // TODO: HOLD UP !!!!!!
-    private void editOrder(Order order) throws FlooringMasteryFileException {
-        io.print("Just type nothing and press 'Enter' if you don't want to edit the value");
+    private void editOrder(LinkedHashMap<String, Order> orderMap, String fileNameDate) throws FlooringMasteryBadDataException {
+        String order_dir = "Orders";
+        String header = "OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total";
+        String fileName = String.format("%s/Orders_%s%s", order_dir, fileNameDate, ".txt");
+        File orderFile = new File(fileName);
 
-        io.print("Customer Name: " + order.getCustomerName());
-        String customerName = io.readString("Enter a new customer name").trim();
-        if (!customerName.isEmpty()) {
-            order.setCustomerName(customerName);
+        try(FileWriter fileWriter = new FileWriter(orderFile)){
+            fileWriter.write(header);
+            fileWriter.write(System.lineSeparator());
+
+            for(Order order: orderMap.values()){
+                String orderDetails = String.format("%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+                        order.getOrderNumber(),
+                        order.getCustomerName(),
+                        order.getState(),
+                        order.getTaxRate(),
+                        order.getProductType(),
+                        order.getArea(),
+                        order.getCostPerSquareFoot(),
+                        order.getLaborCostPerSquareFoot(),
+                        order.getMaterialCost(),
+                        order.getLaborCost(),
+                        order.getTax(),
+                        order.getTotal()
+                );
+
+                fileWriter.write(orderDetails);
+                fileWriter.write(System.lineSeparator());
+            }
+
+        } catch (IOException e) {
+            throw new FlooringMasteryBadDataException("Problem editing the data");
         }
-
-        // TODO: Perhaps list all choices?
-        io.print("Current State: " + order.getState());
-        String state = io.readString("Enter a new state").trim();
-        if (!state.isEmpty()) {
-            order.setState(state);
-        }
-
-        // TODO: Perhaps list all the options
-        io.print("Product type: " + order.getProductType());
-        String productType = io.readString("Enter a new product type").trim();
-        if (!productType.isEmpty()) {
-            order.setProductType(productType);
-        }
-
-
-        io.print("Area: " + order.getArea());
-        String area = io.readString("Enter a new area").trim();
-        if (!area.isEmpty()) {
-            order.setArea(new BigDecimal(area));
-        }
-
-        Product product = dao.getProduct(order.getProductType().substring(0, 1).toUpperCase() + order.getProductType().substring(1));
-//        Product product = dao.getProduct(userChoice.substring(0, 1).toUpperCase() + userChoice.substring(1));
-//        Tax tax = dao.getTax(pickedState.toUpperCase().replaceAll("\\s", ""));
-        Tax tax = dao.getTax(order.getState().toUpperCase().replaceAll("\\s", ""));
-        // Use compute cost
-        Order editOrder = computeCost(customerName, product, tax, order.getArea());
-
-        view.printOrderSummary(editOrder);
-        String userConfirmation = io.readString("If you want to place the order, type 'y', else any other input will cancel the order");
-
-        if (userConfirmation.equalsIgnoreCase("y")) {
-
-            // TODO: Write the map into the file
-            //            placeOrder(order); // EDIT ORDER FUNCTION that will write the order into the file
-            orderEditedMessage();
-            return;
-
-        }
-
-        orderNotEditedMessage();
-
     }
 
     private void orderNotEditedMessage() {
@@ -276,6 +352,10 @@ public class FlooringMasteryController {
         } catch (FlooringMasteryFileException | FlooringMasteryNoSuchFileException e) {
             view.displayErrorMessage(e.getMessage());
         }
+    }
+
+    private Order editNewCost(String customerName, Product product, Tax tax, BigDecimal area, Integer orderNumber) throws FlooringMasteryFileException {
+        return new Order(orderNumber, customerName, tax.getStateAbbreviation(), tax.getTaxRate(), product.getProductType(), area, product.getCostPerSquareFoot(), product.getLaborCostPerSquareFoot());
     }
 
     private Order computeCost(String customerName, Product product, Tax tax, BigDecimal area) throws FlooringMasteryFileException {
