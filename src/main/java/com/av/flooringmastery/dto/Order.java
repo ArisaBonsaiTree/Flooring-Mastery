@@ -37,6 +37,22 @@ public class Order {
         // Default gang
     }
 
+    public Order(String customerName, String state, String productType, String area) {
+        this.customerName = customerName;
+        this.state = state;
+        this.productType = productType;
+        BigDecimal bigDecimalArea = null;
+        area = area.trim();
+
+        try{
+            bigDecimalArea = new BigDecimal(area);
+        }catch (NumberFormatException e){
+            bigDecimalArea = BigDecimal.valueOf(-1);
+        }
+
+        this.area = bigDecimalArea;
+    }
+
     public BigDecimal getMaterialCost() {
         return materialCost;
     }

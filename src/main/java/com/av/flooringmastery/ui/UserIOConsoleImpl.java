@@ -33,7 +33,10 @@ public class UserIOConsoleImpl implements UserIO {
     }
 
 
-
+    @Override
+    public void placeAfterNumber() {
+        console.nextLine();
+    }
 
     @Override
     public String printHashSet(Set<String> set){

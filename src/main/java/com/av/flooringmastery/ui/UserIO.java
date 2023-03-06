@@ -36,5 +36,5 @@ public interface UserIO {
     String printHashSet(Set<String> set);
 
 
-
+    void placeAfterNumber();
 }

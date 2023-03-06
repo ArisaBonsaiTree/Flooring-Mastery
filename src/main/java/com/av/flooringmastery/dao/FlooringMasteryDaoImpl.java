@@ -160,15 +160,47 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
 
 
     @Override
-    public void loadDataIntoHashMaps() throws FlooringMasteryFileException, FlooringMasteryNoSuchFileException {
+    public void loadDataIntoHashMaps() throws FlooringMasteryException {
         loadProductDataIntoHashMap();
         loadTaxDataIntoHashMap();
     }
 
-    private void loadTaxDataIntoHashMap() throws FlooringMasteryFileException, FlooringMasteryNoSuchFileException {
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+
+    public Map<Integer, Order> getOrderMap() {
+        return orderMap;
+    }
+
+    public void setOrderMap(Map<Integer, Order> orderMap) {
+        this.orderMap = orderMap;
+    }
+
+    public HashMap<String, Tax> getTaxMap() {
+        return taxMap;
+    }
+
+    public void setTaxMap(HashMap<String, Tax> taxMap) {
+        this.taxMap = taxMap;
+    }
+
+    public void setProductMap(Map<String, Product> productMap) {
+        this.productMap = productMap;
+    }
+
+    public void setOrdersByDate(LinkedHashMap<String, Order> ordersByDate) {
+        this.ordersByDate = ordersByDate;
+    }
+
+    private void loadTaxDataIntoHashMap() throws FlooringMasteryException {
         File file = getFileFromFolder(DATA_FOLDER, TAX_FILE_NAME);
 
-        if (!file.exists()) throw new FlooringMasteryNoSuchFileException("No such file called " + TAX_FILE_NAME);
+        if (!file.exists()) throw new FlooringMasteryException("No such file called " + TAX_FILE_NAME);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -183,14 +215,14 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
                 taxMap.put(tax.getStateAbbreviation(), tax);
             }
         } catch (Exception e) {
-            throw new FlooringMasteryFileException("File error handling with " + TAX_FILE_NAME);
+            throw new FlooringMasteryException("File error handling with " + TAX_FILE_NAME);
         }
     }
 
-    private void loadProductDataIntoHashMap() throws FlooringMasteryFileException, FlooringMasteryNoSuchFileException {
+    private void loadProductDataIntoHashMap() throws FlooringMasteryException{
         File file = getFileFromFolder(DATA_FOLDER, PRODUCT_FILE_NAME);
 
-        if (!file.exists()) throw new FlooringMasteryNoSuchFileException("No such file called " + PRODUCT_FILE_NAME);
+        if (!file.exists()) throw new FlooringMasteryException("No such file called " + PRODUCT_FILE_NAME);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -202,7 +234,7 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
                 productMap.put(product.getProductType(), product);
             }
         } catch (Exception e) {
-            throw new FlooringMasteryFileException("File error handling with " + PRODUCT_FILE_NAME);
+            throw new FlooringMasteryException("File error handling with " + PRODUCT_FILE_NAME);
         }
     }
 

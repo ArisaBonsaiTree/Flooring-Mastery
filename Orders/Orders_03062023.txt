@@ -1,0 +1,4 @@
+OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total
+13,acme,CA,25.00,Tile,100,3.50,4.15,350.00,415.00,191.25,956.25
+14,laplus darkness,WA,9.25,Wood,150,5.15,4.75,772.50,712.50,137.36,1622.36
+15,Acme,CA,25.00,Carpet,150,2.25,2.10,337.50,315.00,163.13,815.63

@@ -3,13 +3,16 @@ package com.av.flooringmastery.ui;
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class FlooringMasteryView {
 
     // We could just get the size of the Order Map!
     private static int orderId = 1;
+
 
     private UserIO io;
     private final int MIN_CHOICE = 1;
@@ -160,5 +163,30 @@ public class FlooringMasteryView {
 
     public void displayOrderNotDeletedBanner() {
         io.print("Order NOT deleted");
+    }
+
+    public Order getNewOrderInfo(Set<String> statesWeDoService, Map<String, Product> productsWeOffer) {
+        String customerName = io.readString("Please enter a customer name");
+
+        io.printF("States we do business in: [%s]\n", io.printHashSet(statesWeDoService));
+        String pickedState = io.readString("Please pick a state");
+        pickedState = pickedState.toUpperCase();
+
+        displayAllProducts(productsWeOffer);
+
+        String productType = io.readString("Please type in the product type");
+        productType = productType.substring(0, 1).toUpperCase() + productType.substring(1).toLowerCase();
+
+        String areaString = io.readString("Please enter a POSITIVE decimal for area you want work with. Minimum order size is 100 sq ft");
+        return new Order(customerName, pickedState, productType, areaString);
+    }
+
+    public String createOrderUserConfirmation() {
+        return io.readString("If you want to place the order, type 'y', else any other input will cancel the order");
+    }
+
+    public boolean userWantsToLeave() {
+        String userChoice = io.readString("If you would like to leave, type 'q'. Else press any other key to continue");
+        return userChoice.equalsIgnoreCase("q");
     }
 }

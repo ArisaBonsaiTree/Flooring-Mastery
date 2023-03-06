@@ -1,52 +1,19 @@
 package com.av.flooringmastery.service;
 
-import com.av.flooringmastery.dao.FlooringMasteryDao;
-import com.av.flooringmastery.dao.FlooringMasteryFileException;
-import com.av.flooringmastery.dao.FlooringMasteryNoSuchFileException;
+import com.av.flooringmastery.dto.Order;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
-public class FlooringMasteryServiceLayer implements FlooringMasteryServiceLayerImpl{
-    private String pattern = "MMddyyyy";
+public interface FlooringMasteryServiceLayer {
 
-    FlooringMasteryDao dao;
+    List<String> displayOrders(String s) throws FlooringMasteryException;
 
-    public FlooringMasteryServiceLayer(FlooringMasteryDao dao) {
-        this.dao = dao;
-    }
+    Order createOrderObject(Order order) throws FlooringMasteryException;
 
-    @Override
-    public List<String> displayOrders(String dateInput) throws FlooringMasteryException{
-        // Validate the date first
-        if(!isDateValid(dateInput)) throw new FlooringMasteryException("Date inputted doesn't follow " + pattern + " format");
+    Set<String> getStates();
 
-        // Check to see if we even get anything
-        if(dao.listOfOrders(dateInput) == null){
-            throw new FlooringMasteryException(dateInput + " is invalid");
-        }
-        return dao.listOfOrders(dateInput);
-    }
+    void loadDataIntoHashMaps() throws FlooringMasteryException;
 
-    private boolean isDateValid(String dateString) throws FlooringMasteryException{
-        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-        // Set lenient to false, so it will ONLY accept dates in the correct format
-        dateFormat.setLenient(false);
-
-        try{
-            Date date = dateFormat.parse(dateString);
-
-            if(dateFormat.format(date).equals(dateString)){
-                return true;
-            }
-
-        } catch (ParseException e) {
-            return false;
-        }
-        return false;
-    }
-
-
+    void placeOrder(Order newOrder) throws FlooringMasteryException;
 }
