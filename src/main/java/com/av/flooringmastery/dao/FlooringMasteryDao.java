@@ -12,20 +12,12 @@ public interface FlooringMasteryDao {
     Order addOrder(Order order);
 
     List<Order> getAllOrders();
-    Order getOrder(Product product);
-    Order removeOrder(Product product);
-
 
     LinkedHashMap<String, Order> getOrdersByDate();
 
     List<String> listOfOrders(String date) throws FlooringMasteryException;
 
-    // We want to use private methods to load a method that will open a file and load it into a HashMap
     void loadDataIntoHashMaps() throws FlooringMasteryException;
-
-    boolean isValidCustomerName(String name);
-
-    boolean isValidProductType(String productName);
 
     Set<String> getHashMapKeysAsSet(HashMap<String, ?> map);
 
@@ -33,25 +25,23 @@ public interface FlooringMasteryDao {
 
     Product getProduct(String productKey);
 
-
     Tax getTax(String stateKey);
-    boolean isValidState(String stateName);
 
     Map<String, Product> getProductMap();
 
-    public List<Product> getProducts();
+    List<Product> getProducts();
 
-    public void setProducts(List<Product> products);
+    void setProducts(List<Product> products);
 
-    public Map<Integer, Order> getOrderMap();
+    Map<Integer, Order> getOrderMap();
 
-    public void setOrderMap(Map<Integer, Order> orderMap);
+    void setOrderMap(Map<Integer, Order> orderMap);
 
-    public HashMap<String, Tax> getTaxMap();
+    HashMap<String, Tax> getTaxMap();
 
-    public void setTaxMap(HashMap<String, Tax> taxMap);
+    void setTaxMap(HashMap<String, Tax> taxMap);
 
-    public void setProductMap(Map<String, Product> productMap);
+    void setProductMap(Map<String, Product> productMap);
 
-    public void setOrdersByDate(LinkedHashMap<String, Order> ordersByDate);
+    void setOrdersByDate(LinkedHashMap<String, Order> ordersByDate);
 }

@@ -30,45 +30,6 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
     }
 
     @Override
-    public void backupData() throws FlooringMasteryException {
-        Path dataDir = Path.of(ORDER_DIR);
-        Path backupDir = Path.of(BACKUP_DIR);
-        backupDir.toFile().mkdir(); // Create the directory if it doesn't exist
-
-        try {
-            List<String> lines = new ArrayList<>();
-//            lines.add(ORDER_HEADER);
-            Files.list(dataDir)
-                    .filter(Files::isRegularFile)
-                    .forEach(file -> {
-                        try {
-                            List<String> fileLines = Files.readAllLines(file);
-                            lines.addAll(fileLines.subList(1, fileLines.size())); // skip the first line
-                        } catch (IOException e) {
-                            System.err.println("Error reading file: " + e.getMessage());
-                        }
-                    });
-
-            Path backupFile = backupDir.resolve("Backup.txt");
-            Collections.sort(lines, new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    int num1 = Integer.parseInt(o1.split(",")[0]);
-                    int num2 = Integer.parseInt(o2.split(",")[0]);
-                    return num1 - num2;
-                }
-            });
-
-            // Put the header in front of the list
-            lines.add(0, ORDER_HEADER);
-
-            Files.write(backupFile, lines);
-        } catch (IOException e) {
-            throw new FlooringMasteryException(e.getMessage());
-        }
-    }
-
-    @Override
     public List<String> displayOrders(String dateInput) throws FlooringMasteryException {
         // Validate the date first
         if (!isDateValid(dateInput))
@@ -126,6 +87,30 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
     }
 
     @Override
+    public Order deleteOrder(String dateInput, String orderNumber) throws FlooringMasteryException {
+        if (!isDateValid(dateInput)) throw new FlooringMasteryException("Invalid date");
+
+        dao.setOrdersByDate(opensOrderFileAndInsertIntoLinkedHashMap(dateInput));
+
+        LinkedHashMap<String, Order> orderMap = dao.getOrdersByDate();
+
+        Order deleteOrder = orderMap.get(orderNumber);
+
+        if (deleteOrder == null) throw new FlooringMasteryException("No order with order number: " + orderNumber);
+
+        return dao.getOrdersByDate().get(orderNumber);
+    }
+
+    @Override
+    public void deleteOrder(Order deletedOrder, String dateInput) throws FlooringMasteryException {
+        LinkedHashMap<String, Order> orderLinkedHashMap = dao.getOrdersByDate();
+
+        orderLinkedHashMap.remove(deletedOrder.getOrderNumber().toString());
+
+        writeToFileWithLinkedHashMap(orderLinkedHashMap, dateInput);
+    }
+
+    @Override
     public Order editOrder(String dateInput, String orderNumber) throws FlooringMasteryException {
         if (!isDateValid(dateInput)) throw new FlooringMasteryException("Invalid date");
         dao.setOrdersByDate(opensOrderFileAndInsertIntoLinkedHashMap(dateInput));
@@ -137,7 +122,6 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
 
         return editOrder;
     }
-
 
     @Override
     public void editMapAndOverride(Order editOrder, String dateInput) throws FlooringMasteryException {
@@ -209,6 +193,44 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
     }
 
     @Override
+    public void backupData() throws FlooringMasteryException {
+        Path dataDir = Path.of(ORDER_DIR);
+        Path backupDir = Path.of(BACKUP_DIR);
+        backupDir.toFile().mkdir(); // Create the directory if it doesn't exist
+
+        try {
+            List<String> lines = new ArrayList<>();
+            Files.list(dataDir)
+                    .filter(Files::isRegularFile)
+                    .forEach(file -> {
+                        try {
+                            List<String> fileLines = Files.readAllLines(file);
+                            lines.addAll(fileLines.subList(1, fileLines.size())); // skip the first line
+                        } catch (IOException e) {
+                            System.err.println("Error reading file: " + e.getMessage());
+                        }
+                    });
+
+            Path backupFile = backupDir.resolve("Backup.txt");
+            Collections.sort(lines, new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    int num1 = Integer.parseInt(o1.split(",")[0]);
+                    int num2 = Integer.parseInt(o2.split(",")[0]);
+                    return num1 - num2;
+                }
+            });
+
+            // Put the header in front of the list
+            lines.add(0, ORDER_HEADER);
+
+            Files.write(backupFile, lines);
+        } catch (IOException e) {
+            throw new FlooringMasteryException(e.getMessage());
+        }
+    }
+
+    @Override
     public Order computeNewCost(Order orderToBeEdited) {
         Product product = dao.getProduct(orderToBeEdited.getProductType());
         Tax tax = dao.getTax(orderToBeEdited.getState());
@@ -218,12 +240,43 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
     }
 
     @Override
-    public void deleteOrder(Order deletedOrder, String dateInput) throws FlooringMasteryException {
-        LinkedHashMap<String, Order> orderLinkedHashMap = dao.getOrdersByDate();
+    public void loadDataIntoHashMaps() throws FlooringMasteryException {
+        dao.loadDataIntoHashMaps();
+    }
 
-        orderLinkedHashMap.remove(deletedOrder.getOrderNumber().toString());
+    public Set<String> getStates() {
+        Set<String> stateMapKeys = dao.getTaxMap().keySet();
+        String[] keyArray = stateMapKeys.toArray(new String[stateMapKeys.size()]);
+        return new HashSet(Arrays.asList(keyArray));
+    }
 
-        writeToFileWithLinkedHashMap(orderLinkedHashMap, dateInput);
+    public Map<String, Product> getProducts() {
+        return dao.getProductMap();
+    }
+
+    private void appendOrderToFile(String date, String orderDetails, int orderNumber) throws FlooringMasteryException {
+        String fileName = String.format("%s/Orders_%s%s", ORDER_DIR, date, ".txt");
+        File orderFile = new File(fileName);
+        boolean fileExist = orderFile.exists();
+
+        try (FileWriter fileWriter = new FileWriter(orderFile, true)) {
+            // If the order file doesn't exist, create it
+            if (!fileExist) {
+                fileWriter.write(ORDER_HEADER);
+                fileWriter.write(System.lineSeparator());
+            }
+
+            fileWriter.write(orderDetails);
+            fileWriter.write(System.lineSeparator());
+            fileWriter.close();
+
+            incrementOrderNumber(orderNumber);
+
+        } catch (FlooringMasteryException e) {
+            throw new FlooringMasteryException(e.getMessage());
+        } catch (IOException e) {
+            throw new FlooringMasteryException(e.getMessage());
+        }
     }
 
     private void writeToFileWithLinkedHashMap(LinkedHashMap<String, Order> orderMap, String orderDate) throws FlooringMasteryException {
@@ -258,19 +311,16 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
         }
     }
 
-    @Override
-    public Order deleteOrder(String dateInput, String orderNumber) throws FlooringMasteryException {
-        if (!isDateValid(dateInput)) throw new FlooringMasteryException("Invalid date");
+    private void incrementOrderNumber(int count) throws FlooringMasteryException {
+        count++;
 
-        dao.setOrdersByDate(opensOrderFileAndInsertIntoLinkedHashMap(dateInput));
-
-        LinkedHashMap<String, Order> orderMap = dao.getOrdersByDate();
-
-        Order deleteOrder = orderMap.get(orderNumber);
-
-        if (deleteOrder == null) throw new FlooringMasteryException("No order with order number: " + orderNumber);
-
-        return dao.getOrdersByDate().get(orderNumber);
+        try {
+            BufferedWriter incrementWriter = new BufferedWriter(new FileWriter(DATA_DIR + "/" + ORDER_NUMBER_TEXT_FILE));
+            incrementWriter.write(Integer.toString(count));
+            incrementWriter.close();
+        } catch (Exception e) {
+            throw new FlooringMasteryException("Order number file can't be found");
+        }
     }
 
     private LinkedHashMap<String, Order> opensOrderFileAndInsertIntoLinkedHashMap(String dateInput) throws FlooringMasteryException {
@@ -311,43 +361,6 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
         }
 
         return ordersByDate;
-    }
-
-    private void appendOrderToFile(String date, String orderDetails, int orderNumber) throws FlooringMasteryException {
-        String fileName = String.format("%s/Orders_%s%s", ORDER_DIR, date, ".txt");
-        File orderFile = new File(fileName);
-        boolean fileExist = orderFile.exists();
-
-        try (FileWriter fileWriter = new FileWriter(orderFile, true)) {
-            // If the order file doesn't exist, create it
-            if (!fileExist) {
-                fileWriter.write(ORDER_HEADER);
-                fileWriter.write(System.lineSeparator());
-            }
-
-            fileWriter.write(orderDetails);
-            fileWriter.write(System.lineSeparator());
-            fileWriter.close();
-
-            incrementOrderNumber(orderNumber);
-
-        } catch (FlooringMasteryException e) {
-            throw new FlooringMasteryException(e.getMessage());
-        } catch (IOException e) {
-            throw new FlooringMasteryException(e.getMessage());
-        }
-    }
-
-    private void incrementOrderNumber(int count) throws FlooringMasteryException {
-        count++;
-
-        try {
-            BufferedWriter incrementWriter = new BufferedWriter(new FileWriter(DATA_DIR + "/" + ORDER_NUMBER_TEXT_FILE));
-            incrementWriter.write(Integer.toString(count));
-            incrementWriter.close();
-        } catch (Exception e) {
-            throw new FlooringMasteryException("Order number file can't be found");
-        }
     }
 
     private Order createOrderObjectWithCost(String customerName, Product product, Tax tax, BigDecimal area) throws FlooringMasteryException {
@@ -403,21 +416,6 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
     private boolean isValidProductName(String productName) {
         productName = productName.substring(0, 1).toUpperCase() + productName.substring(1).toLowerCase();
         return dao.getProductMap().containsKey(productName);
-    }
-
-    public Set<String> getStates() {
-        Set<String> stateMapKeys = dao.getTaxMap().keySet();
-        String[] keyArray = stateMapKeys.toArray(new String[stateMapKeys.size()]);
-        return new HashSet(Arrays.asList(keyArray));
-    }
-
-    @Override
-    public void loadDataIntoHashMaps() throws FlooringMasteryException {
-        dao.loadDataIntoHashMaps();
-    }
-
-    public Map<String, Product> getProducts() {
-        return dao.getProductMap();
     }
 
     private boolean isValidArea(BigDecimal area) {

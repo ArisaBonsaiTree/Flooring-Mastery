@@ -51,25 +51,6 @@ public class FlooringMasteryController {
         exitMessage();
     }
 
-    private void exportOrders(){
-        view.displayBackingUpDateBanner();
-        try {
-            service.backupData();
-            view.displayBackupSuccessBanner();
-        }
-        catch (FlooringMasteryException e){
-            view.displayErrorMessage(e.getMessage());
-        }
-    }
-
-    private void unknownCommand(){
-        view.displayUnknownComnmmandBanner();
-    }
-
-    private void exitMessage() {
-        view.displayExitBanner();
-    }
-
     private void displayOrders() {
         view.displayDisplayAllBanner();
         boolean hasErrors;
@@ -125,36 +106,6 @@ public class FlooringMasteryController {
         } while (hasErrors);
     }
 
-    private void deleteAnOrder() {
-        view.displayDeleteOrderBanner();
-        boolean hasErrors;
-
-        do{
-            try{
-                String dateInput = view.getOrderDate();
-                String orderNumber = view.getOrderNumber();
-
-                Order deleteOrder = service.deleteOrder(dateInput, orderNumber);
-                view.printOrderSummary(deleteOrder);
-                String userConfirmation = view.deleteOrderUserConfirmation();
-
-                if (userConfirmation.equalsIgnoreCase("y")) {
-                    service.deleteOrder(deleteOrder, dateInput);
-                    view.displayOrderDeletedBanner();
-                    return;
-                }
-
-                view.displayOrderNotDeletedBanner();
-                hasErrors = false;
-            }
-            catch (FlooringMasteryException e){
-                hasErrors = true;
-                view.displayErrorMessage(e.getMessage());
-                if(view.userWantsToLeave()) break;
-            }
-        }while (hasErrors);
-    }
-
     private void editOrder(){
         view.displayEditOrderBanner();
         boolean hasErrors;
@@ -194,8 +145,56 @@ public class FlooringMasteryController {
         } while (hasErrors);
     }
 
+    private void deleteAnOrder() {
+        view.displayDeleteOrderBanner();
+        boolean hasErrors;
+
+        do{
+            try{
+                String dateInput = view.getOrderDate();
+                String orderNumber = view.getOrderNumber();
+
+                Order deleteOrder = service.deleteOrder(dateInput, orderNumber);
+                view.printOrderSummary(deleteOrder);
+                String userConfirmation = view.deleteOrderUserConfirmation();
+
+                if (userConfirmation.equalsIgnoreCase("y")) {
+                    service.deleteOrder(deleteOrder, dateInput);
+                    view.displayOrderDeletedBanner();
+                    return;
+                }
+
+                view.displayOrderNotDeletedBanner();
+                hasErrors = false;
+            }
+            catch (FlooringMasteryException e){
+                hasErrors = true;
+                view.displayErrorMessage(e.getMessage());
+                if(view.userWantsToLeave()) break;
+            }
+        }while (hasErrors);
+    }
+
+    private void exportOrders(){
+        view.displayBackingUpDateBanner();
+        try {
+            service.backupData();
+            view.displayBackupSuccessBanner();
+        }
+        catch (FlooringMasteryException e){
+            view.displayErrorMessage(e.getMessage());
+        }
+    }
+
     private int getUserSelection() {
         return view.printOptionsAndGetSelection();
     }
 
+    private void exitMessage() {
+        view.displayExitBanner();
+    }
+
+    private void unknownCommand(){
+        view.displayUnknownComnmmandBanner();
+    }
 }

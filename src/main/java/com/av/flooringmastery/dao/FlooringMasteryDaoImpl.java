@@ -20,17 +20,11 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
     private final String DATA_FOLDER = "Data";
     private final String TAX_FILE_NAME = "Taxes.txt";
     private final String PRODUCT_FILE_NAME = "Products.txt";
-    private final String DATE_FORMAT = "MMddyy";
 
     private List<Product> products = new ArrayList<>();
-
-    // Keep it simple and just put all the orders here
     private Map<Integer, Order> orderMap = new HashMap<>();
-
-    // TODO: PLACE OUR TAX INFO HERE
     private HashMap<String, Tax> taxMap = new HashMap<>();
     private Map<String, Product> productMap = new HashMap<>();
-
     private LinkedHashMap<String, Order> ordersByDate = new LinkedHashMap<>();
 
 
@@ -38,13 +32,10 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
         return ordersByDate;
     }
 
-
     @Override
     public void setOrdersByDate(LinkedHashMap<String, Order> ordersByDate) {
         this.ordersByDate = ordersByDate;
     }
-
-
 
     @Override
     public Order addOrder(Order order) {
@@ -59,44 +50,6 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
     @Override
     public List<Order> getAllOrders() {
         return new ArrayList(orderMap.values());
-    }
-
-    @Override
-    public Order getOrder(Product product) {
-        return null;
-    }
-
-    @Override
-    public Order removeOrder(Product product) {
-        return null;
-    }
-
-    // TODO: Change exception to custom exception
-    public void loadProductsFromFile() throws IOException {
-        String filePath = Paths.get("Data", "Products").toString();
-
-        List<Product> products = new ArrayList<>();
-
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-
-            while ((line = br.readLine()) != null) {
-                String[] values = line.split(DELIMITER);
-                String productType = values[0];
-                BigDecimal costPerSquareFoot = new BigDecimal(values[1]);
-                BigDecimal laborCostPerSquareFoot = new BigDecimal(values[2]);
-
-                Product product = new Product(productType, costPerSquareFoot, laborCostPerSquareFoot);
-                products.add(product);
-            }
-            // TODO: NEED TO MAKE A CUSTOM EXCEPTION
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public List<Product> getProductArray() {
-        return new ArrayList(products);
     }
 
     @Override
@@ -125,8 +78,6 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
 
         return list;
     }
-
-
 
     @Override
     public void loadDataIntoHashMaps() throws FlooringMasteryException {
@@ -224,36 +175,6 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
             }
         }
         return targetFile;
-    }
-
-
-    public String getDate(boolean isTomorrow) {
-        LocalDate date = LocalDate.now();
-        if (isTomorrow) {
-            date = date.plusDays(1);
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-        return date.format(formatter);
-    }
-
-    @Override
-    public boolean isValidState(String stateName) {
-        return taxMap.containsKey(stateName.toUpperCase());
-    }
-
-    @Override
-    public boolean isValidProductType(String productName){
-        return productMap.containsKey(productName.substring(0, 1).toUpperCase() + productName.substring(1));
-    }
-
-    @Override
-    public boolean isValidCustomerName(String name) {
-        if (name == null || name.isEmpty()) {
-            return false;
-        }
-
-        String regex = "^[a-zA-Z0-9.,\\s]+$";
-        return name.matches(regex);
     }
 
     @Override

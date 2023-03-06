@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 public interface FlooringMasteryServiceLayer {
-
     List<String> displayOrders(String s) throws FlooringMasteryException;
 
     Order createOrderObject(Order order) throws FlooringMasteryException;
