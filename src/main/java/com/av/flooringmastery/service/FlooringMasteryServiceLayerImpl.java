@@ -85,10 +85,7 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
 
     @Override
     public void deleteOrder(Order deletedOrder, String dateInput) throws FlooringMasteryException {
-        // TODO: Key isn't set to order ID?
         LinkedHashMap<String, Order> orderLinkedHashMap = dao.getOrdersByDate();
-
-
 
         orderLinkedHashMap.remove(deletedOrder.getOrderNumber().toString());
 
