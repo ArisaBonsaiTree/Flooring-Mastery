@@ -1,6 +1,5 @@
 package com.av.flooringmastery.service;
 
-import com.av.flooringmastery.dao.FlooringMasteryBadDataException;
 import com.av.flooringmastery.dao.FlooringMasteryDao;
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
@@ -8,6 +7,8 @@ import com.av.flooringmastery.dto.Tax;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,15 +17,55 @@ public class FlooringMasteryServiceLayerImpl implements FlooringMasteryServiceLa
     private static final String ORDER_HEADER = "OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total";
     private static final String ORDER_DIR = "Orders";
     private static final String DATA_DIR = "Data";
+    private static final String BACKUP_DIR = "Backup";
     private static final String ORDER_NUMBER_TEXT_FILE = "OrderNumber.txt";
     private static final int MINIMUM_AREA = 100;
 
-    private String pattern = "MMddyyyy";
+    private final String pattern = "MMddyyyy";
 
     FlooringMasteryDao dao;
 
     public FlooringMasteryServiceLayerImpl(FlooringMasteryDao dao) {
         this.dao = dao;
+    }
+
+    @Override
+    public void backupData() throws FlooringMasteryException {
+        Path dataDir = Path.of(ORDER_DIR);
+        Path backupDir = Path.of(BACKUP_DIR);
+        backupDir.toFile().mkdir(); // Create the directory if it doesn't exist
+
+        try {
+            List<String> lines = new ArrayList<>();
+//            lines.add(ORDER_HEADER);
+            Files.list(dataDir)
+                    .filter(Files::isRegularFile)
+                    .forEach(file -> {
+                        try {
+                            List<String> fileLines = Files.readAllLines(file);
+                            lines.addAll(fileLines.subList(1, fileLines.size())); // skip the first line
+                        } catch (IOException e) {
+                            System.err.println("Error reading file: " + e.getMessage());
+                        }
+                    });
+
+            Path backupFile = backupDir.resolve("Backup.txt");
+            Collections.sort(lines, new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    int num1 = Integer.parseInt(o1.split(",")[0]);
+                    int num2 = Integer.parseInt(o2.split(",")[0]);
+                    return num1 - num2;
+                }
+            });
+
+            // Put the header in front of the list
+            lines.add(0, ORDER_HEADER);
+
+            Files.write(backupFile, lines);
+        } catch (IOException e) {
+            throw new FlooringMasteryException(e.getMessage());
+        }
     }
 
     @Override

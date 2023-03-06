@@ -1,0 +1,8 @@
+OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total
+1,Ada Lovelace,CA,25.00,Tile,249.00,3.50,4.15,871.50,1033.35,476.21,2381.06
+2,Doctor Who,WA,9.25,Wood,243.00,5.15,4.75,1251.45,1154.25,216.51,2622.21
+3,Albert Einstein,KY,6.00,Carpet,217.00,2.25,2.10,488.25,455.70,56.64,1000.59
+13,Fauna,TX,4.45,Carpet,100000,2.25,2.10,225000.00,210000.00,19357.50,454357.50
+16,Me,CA,25.00,Tile,500,3.50,4.15,1750.00,2075.00,956.25,4781.25
+20,LaPlus Darkness,CA,9.25,Wood,500,5.15,4.75,1251.45,1154.25,216.51,2622.21
+21,Albert Einstein,KY,6.00,Carpet,217.00,2.25,2.10,488.25,455.70,56.64,1000.59

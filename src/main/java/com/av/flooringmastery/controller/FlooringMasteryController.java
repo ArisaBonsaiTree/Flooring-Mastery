@@ -1,26 +1,18 @@
 package com.av.flooringmastery.controller;
 
-import com.av.flooringmastery.dao.FlooringMasteryBadDataException;
-import com.av.flooringmastery.dao.FlooringMasteryDao;
-import com.av.flooringmastery.dao.FlooringMasteryFileException;
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
-import com.av.flooringmastery.dto.Tax;
 import com.av.flooringmastery.service.FlooringMasteryException;
 import com.av.flooringmastery.service.FlooringMasteryServiceLayerImpl;
 import com.av.flooringmastery.ui.FlooringMasteryView;
-import com.av.flooringmastery.ui.UserIO;
-import com.av.flooringmastery.ui.UserIOConsoleImpl;
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class FlooringMasteryController {
     private FlooringMasteryView view;
     private FlooringMasteryServiceLayerImpl service;
-    private FlooringMasteryDao dao;
-    private UserIO io = new UserIOConsoleImpl();
 
     public FlooringMasteryController(FlooringMasteryView view, FlooringMasteryServiceLayerImpl service) {
         this.view = view;
@@ -34,34 +26,44 @@ public class FlooringMasteryController {
         while (true) {
             userChoice = getUserSelection();
 
-            try {
-                switch (userChoice) {
-                    case 1:
-                        displayOrders();
-                        break;
-                    case 2:
-                        createOrder();
-                        break;
-                    case 3:
-                        editOrder();
-                        break;
-                    case 4:
-                        deleteAnOrder();
-                        break;
-                    case 5:
-                        io.print("Exporting All Data");
-                        break;
-                    case 6:
-                        io.print("Quiting");
-                        break outer;
-                    default:
-                        io.print("Unknown command");
-                }
-            } catch (Exception e) {
-                view.displayErrorMessage(e.getMessage());
+            switch (userChoice) {
+                case 1:
+                    displayOrders();
+                    break;
+                case 2:
+                    createOrder();
+                    break;
+                case 3:
+                    editOrder();
+                    break;
+                case 4:
+                    deleteAnOrder();
+                    break;
+                case 5:
+                    exportOrders();
+                    break;
+                case 6:
+                    break outer;
+                default:
+                    unknownCommand();
             }
         }
         exitMessage();
+    }
+
+    private void exportOrders(){
+        view.displayBackingUpDateBanner();
+        try {
+            service.backupData();
+            view.displayBackupSuccessBanner();
+        }
+        catch (FlooringMasteryException e){
+            view.displayErrorMessage(e.getMessage());
+        }
+    }
+
+    private void unknownCommand(){
+        view.displayUnknownComnmmandBanner();
     }
 
     private void exitMessage() {
@@ -106,11 +108,11 @@ public class FlooringMasteryController {
 
                 if(getUserConfirmation.equalsIgnoreCase("y")){
                     service.placeOrder(newOrder);
-                    orderPlacedMessage();
+                    view.displayOrderPlacedBanner();
                 }
 
                 else{
-                    orderNotPlacedMessage();
+                    view.displayOrderNotPlacedBanner();
                 }
                 hasErrors = false;
             }
@@ -123,7 +125,6 @@ public class FlooringMasteryController {
         } while (hasErrors);
     }
 
-
     private void deleteAnOrder() {
         view.displayDeleteOrderBanner();
         boolean hasErrors;
@@ -135,8 +136,7 @@ public class FlooringMasteryController {
 
                 Order deleteOrder = service.deleteOrder(dateInput, orderNumber);
                 view.printOrderSummary(deleteOrder);
-
-                String userConfirmation = io.readString("If you want to place DELETE the order, type 'y', else any other input will NOT delete the order");
+                String userConfirmation = view.deleteOrderUserConfirmation();
 
                 if (userConfirmation.equalsIgnoreCase("y")) {
                     service.deleteOrder(deleteOrder, dateInput);
@@ -155,9 +155,7 @@ public class FlooringMasteryController {
         }while (hasErrors);
     }
 
-
-    // TODO: NEXT
-    private void editOrder() throws FlooringMasteryFileException {
+    private void editOrder(){
         view.displayEditOrderBanner();
         boolean hasErrors;
 
@@ -178,15 +176,14 @@ public class FlooringMasteryController {
                 orderToBeEdited = service.computeNewCost(orderToBeEdited);
 
                 view.printOrderSummary(orderToBeEdited);
-
-                String userConfirmation = io.readString("If you want to edit the order, type 'y', else any other input will cancel the order");
+                String userConfirmation = view.editOrderUserConfirmation();
 
                 if (userConfirmation.equalsIgnoreCase("y")) {
                     service.editMapAndOverride(orderToBeEdited, dateInput);
-                    orderEditedMessage();
+                    view.displayOrderEditedBanner();
                     return;
                 }
-                orderNotEditedMessage();
+                view.displayOrderNotEditedBanner();
 
                 hasErrors = false;
             } catch (FlooringMasteryException e) {
@@ -197,27 +194,8 @@ public class FlooringMasteryController {
         } while (hasErrors);
     }
 
-    private void orderNotEditedMessage() {
-        view.displayOrderNotEditedBanner();
-    }
-
-    private void orderEditedMessage() {
-        view.displayOrderEditedBanner();
-    }
-
-    private void orderPlacedMessage() {
-        view.displayOrderPlacedBanner();
-    }
-
     private int getUserSelection() {
         return view.printOptionsAndGetSelection();
     }
 
-    private void orderNotPlacedMessage() {
-        view.displayOrderNotPlacedBanner();
-    }
-
-    private Order editNewCost(String customerName, Product product, Tax tax, BigDecimal area, Integer orderNumber) throws FlooringMasteryFileException {
-        return new Order(orderNumber, customerName, tax.getStateAbbreviation(), tax.getTaxRate(), product.getProductType(), area, product.getCostPerSquareFoot(), product.getLaborCostPerSquareFoot());
-    }
 }

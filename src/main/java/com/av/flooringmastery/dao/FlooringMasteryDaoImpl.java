@@ -45,43 +45,6 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
     }
 
 
-    // TODO: Should use after we validate the file exist
-    // Using the date given to us, open the order file, get the data, and place it into a LinkedHashMap
-//    public void setOrdersByDate(String dateInput) throws FlooringMasteryException {
-//        ordersByDate.clear();
-//
-//        String fileName = "Orders/Orders_" + dateInput + ".txt";
-//        Integer orderNumber = 0;
-//
-//        try(BufferedReader reader = new BufferedReader(new FileReader(fileName))){
-//            String line = reader.readLine(); // Skip header line
-//            while((line = reader.readLine()) != null){
-//                String[] fields = line.split(",");
-//                orderNumber = Integer.parseInt(fields[0]);
-//
-//                if(orderNumber <= 0){
-//                    continue;
-//                }
-//
-//                Order order = new Order();
-//                order.setOrderNumber(orderNumber);
-//                order.setCustomerName(fields[1]);
-//                order.setState(fields[2]);
-//                order.setTaxRate(new BigDecimal(fields[3]));
-//                order.setProductType(fields[4]);
-//                order.setArea(new BigDecimal(fields[5]));
-//                order.setCostPerSquareFoot(new BigDecimal(fields[6]));
-//                order.setLaborCostPerSquareFoot(new BigDecimal(fields[7]));
-//                order.setMaterialCost(new BigDecimal(fields[8]));
-//                order.setLaborCost(new BigDecimal(fields[9]));
-//                order.setTax(new BigDecimal(fields[10]));
-//                order.setTotal(new BigDecimal(fields[11]));
-//                ordersByDate.put(orderNumber.toString(), order);
-//            }
-//        } catch (Exception e) {
-//            throw new FlooringMasteryException("No order file with " + dateInput + " or with order number " + orderNumber.toString());
-//        }
-//    }
 
     @Override
     public Order addOrder(Order order) {

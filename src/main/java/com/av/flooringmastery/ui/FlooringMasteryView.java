@@ -3,7 +3,6 @@ package com.av.flooringmastery.ui;
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -223,5 +222,25 @@ public class FlooringMasteryView {
         String area = io.readString("Enter a new area");
 
         return new Order(customerName, state, product, area, true);
+    }
+
+    public void displayUnknownComnmmandBanner() {
+        io.print("Unknown Command!");
+    }
+
+    public String deleteOrderUserConfirmation() {
+        return io.readString("If you want to place DELETE the order, type 'y', else any other input will NOT delete the order");
+    }
+
+    public String editOrderUserConfirmation() {
+        return io.readString("If you want to edit the order, type 'y', else any other input will cancel the order");
+    }
+
+    public void displayBackingUpDateBanner() {
+        io.print("=== Backing Up Data ===");
+    }
+
+    public void displayBackupSuccessBanner() {
+        io.print("Data backed up successfully");
     }
 }

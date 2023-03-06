@@ -1,24 +1,15 @@
 package com.av.flooringmastery.ui;
 
-import com.av.flooringmastery.dto.Order;
-
 import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Scanner;
+import java.util.Set;
 
 public class UserIOConsoleImpl implements UserIO {
     final private Scanner console = new Scanner(System.in);
-    private final String ORDER_DATE_FORMAT = "MM/dd/yyyy";
-    private final String ORDER_DIR = "Data";
-    private final String PRODUCTS_FILE = "Products.txt";
 
     /**
      * A very simple method that takes in a message to display on the console
-     * and then waits for a integer answer from the user to return.
+     * and then waits for an integer answer from the user to return.
      *
      * @param msg - String of information to display to the user.
      */
@@ -54,7 +45,7 @@ public class UserIOConsoleImpl implements UserIO {
 
     @Override
     public void printF(String format, Object... args) {
-        System.out.print(String.format(format, args));
+        System.out.printf(format, args);
     }
 
     @Override
@@ -83,7 +74,7 @@ public class UserIOConsoleImpl implements UserIO {
 
     /**
      * A simple method that takes in a message to display on the console,
-     * and continually reprompts the user with that message until they enter an integer
+     * and continually prompts the user with that message until they enter an integer
      * to be returned as the answer to that message.
      *
      * @param msgPrompt - String explaining what information you want from the user.
@@ -110,7 +101,7 @@ public class UserIOConsoleImpl implements UserIO {
 
     /**
      * A slightly more complex method that takes in a message to display on the console,
-     * and continually reprompts the user with that message until they enter an integer
+     * and continually prompts the user with that message until they enter an integer
      * within the specified min/max range to be returned as the answer to that message.
      *
      * @param msgPrompt - String explaining what information you want from the user.
@@ -130,7 +121,7 @@ public class UserIOConsoleImpl implements UserIO {
 
     /**
      * A simple method that takes in a message to display on the console,
-     * and continually reprompts the user with that message until they enter a long
+     * and continually prompts the user with that message until they enter a long
      * to be returned as the answer to that message.
      *
      * @param msgPrompt - String explaining what information you want from the user.
@@ -149,13 +140,13 @@ public class UserIOConsoleImpl implements UserIO {
 
     /**
      * A slightly more complex method that takes in a message to display on the console,
-     * and continually reprompts the user with that message until they enter a double
+     * and continually prompts the user with that message until they enter a double
      * within the specified min/max range to be returned as the answer to that message.
      *
      * @param msgPrompt - String explaining what information you want from the user.
      * @param min       - minimum acceptable value for return
      * @param max       - maximum acceptable value for return
-     * @return an long value as an answer to the message prompt within the min/max range
+     * @return a long value as an answer to the message prompt within the min/max range
      */
     @Override
     public long readLong(String msgPrompt, long min, long max) {
@@ -169,7 +160,7 @@ public class UserIOConsoleImpl implements UserIO {
 
     /**
      * A simple method that takes in a message to display on the console,
-     * and continually reprompts the user with that message until they enter a float
+     * and continually prompts the user with that message until they enter a float
      * to be returned as the answer to that message.
      *
      * @param msgPrompt - String explaining what information you want from the user.
@@ -188,13 +179,13 @@ public class UserIOConsoleImpl implements UserIO {
 
     /**
      * A slightly more complex method that takes in a message to display on the console,
-     * and continually reprompts the user with that message until they enter a float
+     * and continually prompts the user with that message until they enter a float
      * within the specified min/max range to be returned as the answer to that message.
      *
      * @param msgPrompt - String explaining what information you want from the user.
      * @param min       - minimum acceptable value for return
      * @param max       - maximum acceptable value for return
-     * @return an float value as an answer to the message prompt within the min/max range
+     * @return a float value as an answer to the message prompt within the min/max range
      */
     @Override
     public float readFloat(String msgPrompt, float min, float max) {
@@ -208,7 +199,7 @@ public class UserIOConsoleImpl implements UserIO {
 
     /**
      * A simple method that takes in a message to display on the console,
-     * and continually reprompts the user with that message until they enter a double
+     * and continually prompts the user with that message until they enter a double
      * to be returned as the answer to that message.
      *
      * @param msgPrompt - String explaining what information you want from the user.
@@ -227,13 +218,13 @@ public class UserIOConsoleImpl implements UserIO {
 
     /**
      * A slightly more complex method that takes in a message to display on the console,
-     * and continually reprompts the user with that message until they enter a double
+     * and continually prompts the user with that message until they enter a double
      * within the specified min/max range to be returned as the answer to that message.
      *
      * @param msgPrompt - String explaining what information you want from the user.
      * @param min       - minimum acceptable value for return
      * @param max       - maximum acceptable value for return
-     * @return an double value as an answer to the message prompt within the min/max range
+     * @return a double value as an answer to the message prompt within the min/max range
      */
     @Override
     public double readDouble(String msgPrompt, double min, double max) {
