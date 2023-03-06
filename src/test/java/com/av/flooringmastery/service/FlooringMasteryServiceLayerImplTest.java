@@ -8,8 +8,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FlooringMasteryServiceLayerImplTest {
 
@@ -57,6 +56,16 @@ public class FlooringMasteryServiceLayerImplTest {
     }
 
     @Test
+    void editOrder(){
+        try{
+            serviceLayer.editOrder("06022013", "2");
+        }
+        catch (FlooringMasteryException e){
+            fail("Valid edit input");
+        }
+    }
+
+    @Test
     void testValidGetAllOrders(){
         try{
             List<String> listOfOrders = serviceLayer.displayOrders("01012020");
@@ -64,6 +73,21 @@ public class FlooringMasteryServiceLayerImplTest {
         }
         catch (FlooringMasteryException e){
             fail("Valid command. No exception should have been thrown");
+        }
+    }
+
+    @Test
+    void testDeleteOrder() throws FlooringMasteryException{
+
+        Order order = serviceLayer.deleteOrder("01012023", "20");
+
+        assertNotNull(order, "Removing 20 should not be null");
+
+        Order orderTwo = null;
+        try {
+            orderTwo = serviceLayer.deleteOrder("01012023", "24432432423324234243");
+        }catch (FlooringMasteryException e){
+            assertNull(orderTwo, "Removing 24432432423324234243 should be null");
         }
     }
 
