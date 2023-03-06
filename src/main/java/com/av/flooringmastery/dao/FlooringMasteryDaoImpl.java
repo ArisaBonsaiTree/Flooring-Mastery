@@ -3,6 +3,7 @@ package com.av.flooringmastery.dao;
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
 import com.av.flooringmastery.dto.Tax;
+import com.av.flooringmastery.service.FlooringMasteryException;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -130,10 +131,10 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
     }
 
     @Override
-    public List<String> listOfOrders(String dateInput) throws FlooringMasteryNoSuchFileException, FlooringMasteryFileException {
+    public List<String> listOfOrders(String dateInput) throws FlooringMasteryException {
         File targetFile = locateAndGetOrderFile(ORDER_FOLDER, dateInput);
 
-        if (targetFile == null) throw new FlooringMasteryNoSuchFileException("No such file exist");
+        if (targetFile == null) throw new FlooringMasteryException("No such file exist");
 
         ArrayList<String> list = new ArrayList<>();
 
@@ -150,7 +151,7 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
 
             reader.close();
         } catch (Exception e) {
-            throw new FlooringMasteryFileException("Error with file handling");
+            throw new FlooringMasteryException("Error with file handling");
         }
 
         return list;

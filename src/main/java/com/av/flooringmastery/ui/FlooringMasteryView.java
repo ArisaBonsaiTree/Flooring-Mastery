@@ -39,8 +39,12 @@ public class FlooringMasteryView {
         io.print("=== Display All Orders");
     }
 
+    public void informUserToQuit(){
+        io.print("Type 'q' if you ever want to leave");
+    }
+
     public String getOrderDate() {
-        return io.readString("Enter a date MMDDYYYY]: ");
+        return io.readString("Enter a date MMDDYYYY: ");
     }
 
     public String getOrderNumber(){

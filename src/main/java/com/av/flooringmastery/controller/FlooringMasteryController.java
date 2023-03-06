@@ -7,6 +7,7 @@ import com.av.flooringmastery.dao.FlooringMasteryNoSuchFileException;
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
 import com.av.flooringmastery.dto.Tax;
+import com.av.flooringmastery.service.FlooringMasteryException;
 import com.av.flooringmastery.service.FlooringMasteryServiceLayer;
 import com.av.flooringmastery.ui.FlooringMasteryView;
 import com.av.flooringmastery.ui.UserIO;
@@ -26,10 +27,13 @@ public class FlooringMasteryController {
 
     private UserIO io = new UserIOConsoleImpl();
 
-    public FlooringMasteryController(FlooringMasteryView view, FlooringMasteryDao dao) {
+    public FlooringMasteryController(FlooringMasteryView view, FlooringMasteryDao dao, FlooringMasteryServiceLayer service) {
         this.view = view;
+        this.service = service;
         this.dao = dao;
     }
+
+
 
     public void run() {
         int userChoice;
@@ -74,15 +78,21 @@ public class FlooringMasteryController {
 
     private void displayOrders() {
         view.displayDisplayAllBanner();
-
-        String dateInput = view.getOrderDate();
-
-        try {
-            List<String> listOfOrders = dao.listOfOrders(dateInput);
-            view.displayAllOrderList(listOfOrders);
-        } catch (FlooringMasteryNoSuchFileException | FlooringMasteryFileException e) {
-            view.displayErrorMessage(e.getMessage());
-        }
+        boolean hasErrors;
+        view.informUserToQuit();
+        do {
+            try {
+                String dateInput = view.getOrderDate();
+                if(dateInput.equals("q")) break; // Break out of the loop EARLY!
+                List<String> listOfOrders = service.displayOrders(dateInput);
+                view.displayAllOrderList(listOfOrders);
+                hasErrors = false;
+            }
+            catch (FlooringMasteryException e) {
+                hasErrors = true;
+                view.displayErrorMessage(e.getMessage());
+            }
+        }while (hasErrors);
     }
 
     // TODO: Dafuq you didnt even finish this bro??????

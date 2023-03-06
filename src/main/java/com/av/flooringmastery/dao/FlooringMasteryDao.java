@@ -3,6 +3,7 @@ package com.av.flooringmastery.dao;
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
 import com.av.flooringmastery.dto.Tax;
+import com.av.flooringmastery.service.FlooringMasteryException;
 
 import java.util.*;
 
@@ -19,7 +20,7 @@ public interface FlooringMasteryDao {
 
     void setOrdersByDate(String dateInput) throws FlooringMasteryBadDataException;
 
-    List<String> listOfOrders(String date) throws FlooringMasteryNoSuchFileException, FlooringMasteryFileException;
+    List<String> listOfOrders(String date) throws FlooringMasteryException;
 
     // We want to use private methods to load a method that will open a file and load it into a HashMap
     void loadDataIntoHashMaps() throws FlooringMasteryFileException,  FlooringMasteryNoSuchFileException;

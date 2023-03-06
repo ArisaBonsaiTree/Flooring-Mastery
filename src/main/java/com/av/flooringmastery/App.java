@@ -3,6 +3,7 @@ package com.av.flooringmastery;
 import com.av.flooringmastery.controller.FlooringMasteryController;
 import com.av.flooringmastery.dao.FlooringMasteryDao;
 import com.av.flooringmastery.dao.FlooringMasteryDaoImpl;
+import com.av.flooringmastery.service.FlooringMasteryServiceLayer;
 import com.av.flooringmastery.ui.FlooringMasteryView;
 import com.av.flooringmastery.ui.UserIO;
 import com.av.flooringmastery.ui.UserIOConsoleImpl;
@@ -14,8 +15,8 @@ public class App {
         FlooringMasteryView view = new FlooringMasteryView(io);
 
         FlooringMasteryDao dao = new FlooringMasteryDaoImpl();
-
-        FlooringMasteryController controller = new FlooringMasteryController(view, dao);
+        FlooringMasteryServiceLayer serviceLayer = new FlooringMasteryServiceLayer(dao);
+        FlooringMasteryController controller = new FlooringMasteryController(view, dao, serviceLayer);
 
         controller.run();
     }
