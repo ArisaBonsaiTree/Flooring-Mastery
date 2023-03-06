@@ -5,6 +5,7 @@ import com.av.flooringmastery.dto.Product;
 import com.av.flooringmastery.dto.Tax;
 import com.av.flooringmastery.service.FlooringMasteryException;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class FlooringMasteryDaoStubImpl implements FlooringMasteryDao{
@@ -13,7 +14,10 @@ public class FlooringMasteryDaoStubImpl implements FlooringMasteryDao{
 
     public FlooringMasteryDaoStubImpl(){
         onlyOrder = new Order();
-
+        onlyOrder.setCustomerName("Test");
+        onlyOrder.setState("CA");
+        onlyOrder.setProductType("Wood");
+        onlyOrder.setArea(new BigDecimal("150"));
     }
 
     public FlooringMasteryDaoStubImpl(Order onlyOrder){this.onlyOrder = onlyOrder; }
@@ -25,28 +29,7 @@ public class FlooringMasteryDaoStubImpl implements FlooringMasteryDao{
     }
 
     @Override
-    public Order removeOrder(Product product) {
-        return null;
-    }
-
-
-    @Override
     public List<Order> getAllOrders() {
-        return null;
-    }
-
-
-
-
-
-    @Override
-    public Order getOrder(Product product) {
-        return null;
-    }
-
-
-    @Override
-    public LinkedHashMap<String, Order> getOrdersByDate() {
         return null;
     }
 
@@ -56,18 +39,15 @@ public class FlooringMasteryDaoStubImpl implements FlooringMasteryDao{
     }
 
     @Override
+    public LinkedHashMap<String, Order> getOrdersByDate() {
+        return null;
+    }
+
+
+
+    @Override
     public void loadDataIntoHashMaps() throws FlooringMasteryException {
 
-    }
-
-    @Override
-    public boolean isValidCustomerName(String name) {
-        return false;
-    }
-
-    @Override
-    public boolean isValidProductType(String productName) {
-        return false;
     }
 
     @Override
@@ -88,11 +68,6 @@ public class FlooringMasteryDaoStubImpl implements FlooringMasteryDao{
     @Override
     public Tax getTax(String stateKey) {
         return null;
-    }
-
-    @Override
-    public boolean isValidState(String stateName) {
-        return false;
     }
 
     @Override
