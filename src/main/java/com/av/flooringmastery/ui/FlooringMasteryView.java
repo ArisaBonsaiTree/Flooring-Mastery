@@ -35,11 +35,12 @@ public class FlooringMasteryView {
     }
 
     public void displayCreateOrderBanner() {
+        io.print("=== Adding an Order ===");
     }
 
 
     public void displayDisplayAllBanner() {
-        io.print("=== Display All Orders");
+        io.print("=== Display All Orders ===");
     }
 
     public void informUserToQuit(){
@@ -188,5 +189,9 @@ public class FlooringMasteryView {
     public boolean userWantsToLeave() {
         String userChoice = io.readString("If you would like to leave, type 'q'. Else press any other key to continue");
         return userChoice.equalsIgnoreCase("q");
+    }
+
+    public void displayDeleteOrderBanner() {
+        io.print("=== Adding an Order ===");
     }
 }

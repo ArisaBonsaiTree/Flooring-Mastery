@@ -18,8 +18,6 @@ public interface FlooringMasteryDao {
 
     LinkedHashMap<String, Order> getOrdersByDate();
 
-    void setOrdersByDate(String dateInput) throws FlooringMasteryBadDataException;
-
     List<String> listOfOrders(String date) throws FlooringMasteryException;
 
     // We want to use private methods to load a method that will open a file and load it into a HashMap

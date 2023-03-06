@@ -17,21 +17,15 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class FlooringMasteryController {
-    private static final String FILENAME = "Data/OrderNumber.txt";
-
     private FlooringMasteryView view;
     private FlooringMasteryServiceLayerImpl service;
     private FlooringMasteryDao dao;
-
-
     private UserIO io = new UserIOConsoleImpl();
 
     public FlooringMasteryController(FlooringMasteryView view, FlooringMasteryServiceLayerImpl service) {
         this.view = view;
         this.service = service;
     }
-
-
 
     public void run() {
         int userChoice;
@@ -93,46 +87,78 @@ public class FlooringMasteryController {
         }while (hasErrors);
     }
 
-    // TODO: Dafuq you didnt even finish this bro??????
-    private void deleteAnOrder() throws FlooringMasteryBadDataException {
-        String dateInput = null;
-        String orderNumber = null;
-        try{
-            // TODO: Should validate the input before we even start
-            dateInput = view.getOrderDate();
-            orderNumber = view.getOrderNumber();
+    private void createOrder() {
+        view.displayCreateOrderBanner();
+        view.informUserToQuit();
+        boolean hasErrors;
+        do {
+            try {
+                service.loadDataIntoHashMaps();
+                Set<String> statesWeDoService = service.getStates();
+                Map<String, Product> productsWeOffer = service.getProducts();
 
-            dao.setOrdersByDate(dateInput);
+                Order currentObject = view.getNewOrderInfo(statesWeDoService, productsWeOffer);
 
-            LinkedHashMap<String, Order> orderMap = dao.getOrdersByDate();
-            Order deleteOrder = orderMap.get(orderNumber);
+                Order newOrder = service.createOrderObject(currentObject);
+                view.printOrderSummary(newOrder);
 
-            view.printOrderSummary(deleteOrder);
-            String userConfirmation = io.readString("If you want to place DELETE the order, type 'y', else any other input will NOT delete the order");
+                String getUserConfirmation = view.createOrderUserConfirmation();
 
-            if (userConfirmation.equalsIgnoreCase("y")) {
-                deleteOrder.setOrderNumber(deleteOrder.getOrderNumber() * -1); // Made it negative so it's gone!
-                orderMap.remove(orderNumber); // DELETE IT FROM THE HASHMAP
-                deleteOrder(orderMap, dateInput);
-                orderDeletedMessage();
-                return;
+                if(getUserConfirmation.equalsIgnoreCase("y")){
+                    service.placeOrder(newOrder);
+                    orderPlacedMessage();
+                }
+
+                else{
+                    orderNotPlacedMessage();
+                }
+                hasErrors = false;
             }
 
-            orderNotDeletedMessage();
-        }catch (Exception e){
-            throw new FlooringMasteryBadDataException("No order file with " + dateInput + " or with order number " + orderNumber.toString());
-        }
+            catch (FlooringMasteryException e) {
+                hasErrors = true;
+                view.displayErrorMessage(e.getMessage());
+                if(view.userWantsToLeave()) break;
+            }
+        } while (hasErrors);
     }
 
-    private void orderNotDeletedMessage() {
-        view.displayOrderNotDeletedBanner();
+
+    // TODO: NEXT
+    private void deleteAnOrder() throws FlooringMasteryBadDataException {
+        view.displayDeleteOrderBanner();
+        boolean hasErrors;
+
+        do{
+            try{
+                String dateInput = view.getOrderDate();
+                String orderNumber = view.getOrderNumber();
+
+                Order deleteOrder = service.deleteOrder(dateInput, orderNumber);
+                view.printOrderSummary(deleteOrder);
+
+                String userConfirmation = io.readString("If you want to place DELETE the order, type 'y', else any other input will NOT delete the order");
+
+                if (userConfirmation.equalsIgnoreCase("y")) {
+                    service.deleteOrder(deleteOrder, dateInput);
+                    view.displayOrderDeletedBanner();
+                    return;
+                }
+
+
+                view.displayOrderNotDeletedBanner();
+                hasErrors = false;
+            }
+            catch (FlooringMasteryException e){
+                hasErrors = true;
+                view.displayErrorMessage(e.getMessage());
+                if(view.userWantsToLeave()) break;
+            }
+        }while (hasErrors);
     }
 
-    private void orderDeletedMessage() {
-        view.displayOrderDeletedBanner();
-    }
 
-    // TODO: HOLD UP !!!!!!
+
     private void editOrder() throws FlooringMasteryFileException {
         String dateInput = null;
         String orderNumber = null;
@@ -142,7 +168,7 @@ public class FlooringMasteryController {
             dateInput = view.getOrderDate();
             orderNumber = view.getOrderNumber();
 
-            dao.setOrdersByDate(dateInput);
+            //dao.setOrdersByDate(dateInput);
 
             LinkedHashMap<String, Order> orderMap = dao.getOrdersByDate();
             editOrder = orderMap.get(orderNumber);
@@ -279,49 +305,8 @@ public class FlooringMasteryController {
         view.displayOrderPlacedBanner();
     }
 
-    private void orderNotPlacedBanner() {
-        view.displayOrderNotPlacedBanner();
-    }
-
     private int getUserSelection() {
         return view.printOptionsAndGetSelection();
-    }
-
-
-    private void createOrder() {
-        view.displayCreateOrderBanner();
-        view.informUserToQuit();
-        boolean hasErrors;
-        do {
-            try {
-                service.loadDataIntoHashMaps();
-                Set<String> statesWeDoService = service.getStates();
-                Map<String, Product> productsWeOffer = service.getProducts();
-
-                Order currentObject = view.getNewOrderInfo(statesWeDoService, productsWeOffer);
-
-                Order newOrder = service.createOrderObject(currentObject);
-                view.printOrderSummary(newOrder);
-
-                String getUserConfirmation = view.createOrderUserConfirmation();
-
-                if(getUserConfirmation.equalsIgnoreCase("y")){
-                    service.placeOrder(newOrder);
-                    orderPlacedMessage();
-                }
-
-                else{
-                    orderNotPlacedMessage();
-                }
-                hasErrors = false;
-            }
-
-            catch (FlooringMasteryException e) {
-                hasErrors = true;
-                view.displayErrorMessage(e.getMessage());
-                if(view.userWantsToLeave()) break;
-            }
-        } while (hasErrors);
     }
 
     private void orderNotPlacedMessage() {
@@ -331,39 +316,4 @@ public class FlooringMasteryController {
     private Order editNewCost(String customerName, Product product, Tax tax, BigDecimal area, Integer orderNumber) throws FlooringMasteryFileException {
         return new Order(orderNumber, customerName, tax.getStateAbbreviation(), tax.getTaxRate(), product.getProductType(), area, product.getCostPerSquareFoot(), product.getLaborCostPerSquareFoot());
     }
-
-    private void deleteOrder(LinkedHashMap<String, Order> orderMap, String orderDate) throws IOException {
-        String order_dir = "Orders";
-        String header = "OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total";
-        String fileName = String.format("%s/Orders_%s%s", order_dir, orderDate, ".txt");
-        File orderFile = new File(fileName);
-
-        FileWriter writer = new FileWriter(orderFile);
-
-        writer.write(header + "\n");
-
-        for (Order order : orderMap.values()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(order.getOrderNumber()).append(",");
-            sb.append(order.getCustomerName()).append(",");
-            sb.append(order.getState()).append(",");
-            sb.append(order.getTaxRate()).append(",");
-            sb.append(order.getProductType()).append(",");
-            sb.append(order.getArea()).append(",");
-            sb.append(order.getCostPerSquareFoot()).append(",");
-            sb.append(order.getLaborCostPerSquareFoot()).append(",");
-            sb.append(order.getMaterialCost()).append(",");
-            sb.append(order.getLaborCost()).append(",");
-            sb.append(order.getTax()).append(",");
-            sb.append(order.getTotal()).append("\n");
-
-            // write the order to the file
-            writer.write(sb.toString());
-        }
-
-        writer.close();
-
-    }
-
-
 }

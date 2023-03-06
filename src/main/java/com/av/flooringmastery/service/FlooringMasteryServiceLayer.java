@@ -16,4 +16,8 @@ public interface FlooringMasteryServiceLayer {
     void loadDataIntoHashMaps() throws FlooringMasteryException;
 
     void placeOrder(Order newOrder) throws FlooringMasteryException;
+
+    Order deleteOrder(String dateInput, String orderNumber) throws FlooringMasteryException;
+
+    void deleteOrder(Order deletedOrder, String dateInput) throws FlooringMasteryException;
 }
