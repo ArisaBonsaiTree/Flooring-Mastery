@@ -40,15 +40,15 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
 
     // Put the order date and put it in a HashMap
 
-    public void setOrdersByDate(String dateInput) {
+    public void setOrdersByDate(String dateInput) throws FlooringMasteryBadDataException {
         ordersByDate.clear(); // Empty it!!!!
         String fileName = "Orders/Orders_" + dateInput + ".txt";
-
+        Integer orderNumber = 0;
         try(BufferedReader reader = new BufferedReader(new FileReader(fileName))){
             String line = reader.readLine(); // Skip header line
             while((line = reader.readLine()) != null){
                 String[] fields = line.split(",");
-                Integer orderNumber = Integer.parseInt(fields[0]);
+                orderNumber = Integer.parseInt(fields[0]);
 
                 if(orderNumber <= 0){
                     continue;
@@ -71,10 +71,8 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
                 ordersByDate.put(orderNumber.toString(), order);
 
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new FlooringMasteryBadDataException("No order file with " + dateInput + " or with order number " + orderNumber.toString());
         }
     }
 

@@ -17,7 +17,7 @@ public interface FlooringMasteryDao {
 
     LinkedHashMap<String, Order> getOrdersByDate();
 
-    void setOrdersByDate(String dateInput);
+    void setOrdersByDate(String dateInput) throws FlooringMasteryBadDataException;
 
     List<String> listOfOrders(String date) throws FlooringMasteryNoSuchFileException, FlooringMasteryFileException;
 
