@@ -209,4 +209,8 @@ public class Order {
                 ", total=" + total +
                 '}';
     }
+
+    public void setMaterialCost(BigDecimal bigDecimal) {
+        this.materialCost = bigDecimal;
+    }
 }

@@ -3,8 +3,6 @@ package com.av.flooringmastery.ui;
 import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +41,10 @@ public class FlooringMasteryView {
 
     public String getOrderDate() {
         return io.readString("Enter a date [MM/DD/YYYY or MMDDYYYY]: ");
+    }
+
+    public String getOrderNumber(){
+        return io.readString("Enter the order number");
     }
 
 
@@ -138,5 +140,21 @@ public class FlooringMasteryView {
 
     public void displayOrderPlacedBanner() {
         io.print("Order Placed!");
+    }
+
+    public void displayOrderEditedBanner() {
+        io.print("Order Edited!");
+    }
+
+    public void displayOrderNotEditedBanner() {
+        io.print("Order NOT Edited!");
+    }
+
+    public void displayOrderDeletedBanner() {
+        io.print("Order DELETED");
+    }
+
+    public void displayOrderNotDeletedBanner() {
+        io.print("Order NOT deleted");
     }
 }

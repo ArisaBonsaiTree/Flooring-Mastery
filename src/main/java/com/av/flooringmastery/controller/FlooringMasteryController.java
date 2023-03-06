@@ -47,10 +47,10 @@ public class FlooringMasteryController {
                         createOrder();
                         break;
                     case 3:
-                        io.print("Editing an Order");
+                        editOrder();
                         break;
                     case 4:
-                        io.print("Removing an Order");
+                        deleteAnOrder();
                         break;
                     case 5:
                         io.print("Exporting All Data");
@@ -84,17 +84,132 @@ public class FlooringMasteryController {
         }
     }
 
+    // TODO: Dafuq you didnt even finish this bro??????
+    private void deleteAnOrder() throws FlooringMasteryNoSuchFileException, IOException {
+        // TODO: Should validate the input before we even start
+        String dateInput = view.getOrderDate();
+
+
+        String orderNumber = view.getOrderNumber();
+        boolean foundOrder = false;
+
+
+        // Place the orders in the file into a HashMap
+        dao.setOrdersByDate(dateInput);
+
+        LinkedHashMap<String, Order> orderMap = dao.getOrdersByDate();
+        Order deleteOrder = orderMap.get(orderNumber);
+        if(deleteOrder == null) throw new FlooringMasteryNoSuchFileException("No such order with orderdate(" + dateInput + ") with order number: " + orderNumber);
+
+        view.printOrderSummary(deleteOrder);
+
+//        Order editOrder = orderMap.get(orderNumber);
+//        if(editOrder == null) throw new FlooringMasteryNoSuchFileException("No such order with orderdate(" + dateInput + ") with order number: " + orderNumber);
+//        // ONLY ALLOW US TO
+//        System.out.println(editOrder.toString());
+        String userConfirmation = io.readString("If you want to place DELETE the order, type 'y', else any other input will NOT delete the order");
+
+        if(userConfirmation.equalsIgnoreCase("y")){
+            deleteOrder.setOrderNumber(deleteOrder.getOrderNumber() * -1); // Made it negative so it's gone!
+            orderMap.remove(orderNumber); // DELETE IT FROM THE HASHMAP
+            deleteOrder(orderMap, dateInput);
+            orderDeletedMessage();
+            return;
+
+        }
+
+        orderNotDeletedMessage();
+
+
+
+    }
+
+    private void orderNotDeletedMessage() {
+        view.displayOrderNotDeletedBanner();
+    }
+
+    private void orderDeletedMessage() {
+        view.displayOrderDeletedBanner();
+    }
+
+    private void editOrder(){
+
+    }
+
+    // TODO: HOLD UP !!!!!!
+    private void editOrder(Order order) throws FlooringMasteryFileException {
+        io.print("Just type nothing and press 'Enter' if you don't want to edit the value");
+
+        io.print("Customer Name: " + order.getCustomerName());
+        String customerName = io.readString("Enter a new customer name").trim();
+        if(!customerName.isEmpty()){
+            order.setCustomerName(customerName);
+        }
+
+        // TODO: Perhaps list all choices?
+        io.print("Current State: " + order.getState());
+        String state = io.readString("Enter a new state").trim();
+        if(!state.isEmpty()){
+            order.setState(state);
+        }
+
+        // TODO: Perhaps list all the options
+        io.print("Product type: " + order.getProductType());
+        String productType = io.readString("Enter a new product type").trim();
+        if(!productType.isEmpty()){
+            order.setProductType(productType);
+        }
+
+
+        io.print("Area: " + order.getArea());
+        String area = io.readString("Enter a new area").trim();
+        if(!area.isEmpty()){
+            order.setArea(new BigDecimal(area));
+        }
+
+        Product product = dao.getProduct(order.getProductType().substring(0, 1).toUpperCase() + order.getProductType().substring(1));
+//        Product product = dao.getProduct(userChoice.substring(0, 1).toUpperCase() + userChoice.substring(1));
+//        Tax tax = dao.getTax(pickedState.toUpperCase().replaceAll("\\s", ""));
+        Tax tax = dao.getTax(order.getState().toUpperCase().replaceAll("\\s", ""));
+        // Use compute cost
+        Order editOrder = computeCost(customerName, product, tax, order.getArea());
+
+        view.printOrderSummary(editOrder);
+        String userConfirmation = io.readString("If you want to place the order, type 'y', else any other input will cancel the order");
+
+        if(userConfirmation.equalsIgnoreCase("y")){
+
+            // TODO: Write the map into the file
+            //            placeOrder(order); // EDIT ORDER FUNCTION that will write the order into the file
+            orderEditedMessage();
+            return;
+
+        }
+
+        orderNotEditedMessage();
+
+    }
+
+    private void orderNotEditedMessage() {
+        view.displayOrderNotEditedBanner();
+    }
+
+    private void orderEditedMessage() {
+        view.displayOrderEditedBanner();
+    }
+
     private void orderPlacedMessage(){
         view.displayOrderPlacedBanner();
     }
 
-    private void orderNotPlacedBaner(){
+    private void orderNotPlacedBanner(){
         view.displayOrderNotPlacedBanner();
     }
 
     private int getUserSelection() {
         return view.printOptionsAndGetSelection();
     }
+
 
     private void createOrder(){
         view.displayCreateOrderBanner();
@@ -145,7 +260,7 @@ public class FlooringMasteryController {
                         orderPlacedMessage();
                         break;
                     }
-                    orderNotPlacedBaner();
+                    orderNotPlacedBanner();
 
                     break;
                 }
@@ -177,6 +292,39 @@ public class FlooringMasteryController {
             throw new FlooringMasteryFileException("No such file exist");
         }
         return new Order(orderNumber, customerName, tax.getStateAbbreviation(), tax.getTaxRate(), product.getProductType(), area, product.getCostPerSquareFoot(), product.getLaborCostPerSquareFoot());
+    }
+
+    private void deleteOrder(LinkedHashMap<String, Order> orderMap, String orderDate) throws IOException {
+        String order_dir = "Orders";
+        String header = "OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total";
+        String fileName = String.format("%s/Orders_%s%s", order_dir, orderDate, ".txt");
+        File orderFile = new File(fileName);
+
+        FileWriter writer = new FileWriter(orderFile);
+
+        writer.write(header + "\n");
+
+        for(Order order:orderMap.values()){
+            StringBuilder sb = new StringBuilder();
+            sb.append(order.getOrderNumber()).append(",");
+            sb.append(order.getCustomerName()).append(",");
+            sb.append(order.getState()).append(",");
+            sb.append(order.getTaxRate()).append(",");
+            sb.append(order.getProductType()).append(",");
+            sb.append(order.getArea()).append(",");
+            sb.append(order.getCostPerSquareFoot()).append(",");
+            sb.append(order.getLaborCostPerSquareFoot()).append(",");
+            sb.append(order.getMaterialCost()).append(",");
+            sb.append(order.getLaborCost()).append(",");
+            sb.append(order.getTax()).append(",");
+            sb.append(order.getTotal()).append("\n");
+
+            // write the order to the file
+            writer.write(sb.toString());
+        }
+
+        writer.close();
+
     }
 
     private void placeOrder(Order order){

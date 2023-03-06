@@ -4,10 +4,7 @@ import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
 import com.av.flooringmastery.dto.Tax;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -33,6 +30,53 @@ public class FlooringMasteryDaoImpl implements FlooringMasteryDao {
     private HashMap<String, Tax> taxMap = new HashMap<>();
     private Map<String, Product> productMap = new HashMap<>();
 
+    private LinkedHashMap<String, Order> ordersByDate = new LinkedHashMap<>();
+
+    public LinkedHashMap<String, Order> getOrdersByDate() {
+        return ordersByDate;
+    }
+
+
+
+    // Put the order date and put it in a HashMap
+
+    public void setOrdersByDate(String dateInput) {
+        ordersByDate.clear(); // Empty it!!!!
+        String fileName = "Orders/Orders_" + dateInput + ".txt";
+
+        try(BufferedReader reader = new BufferedReader(new FileReader(fileName))){
+            String line = reader.readLine(); // Skip header line
+            while((line = reader.readLine()) != null){
+                String[] fields = line.split(",");
+                Integer orderNumber = Integer.parseInt(fields[0]);
+
+                if(orderNumber <= 0){
+                    continue;
+                }
+                // OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total
+                Order order = new Order();
+                order.setOrderNumber(orderNumber);
+                order.setCustomerName(fields[1]);
+                order.setState(fields[2]);
+                order.setTaxRate(new BigDecimal(fields[3]));
+                order.setProductType(fields[4]);
+                order.setArea(new BigDecimal(fields[5]));
+                order.setCostPerSquareFoot(new BigDecimal(fields[6]));
+                order.setLaborCostPerSquareFoot(new BigDecimal(fields[7]));
+                order.setMaterialCost(new BigDecimal(fields[8]));
+                order.setLaborCost(new BigDecimal(fields[9]));
+                order.setTax(new BigDecimal(fields[10]));
+                order.setTotal(new BigDecimal(fields[11]));
+
+                ordersByDate.put(orderNumber.toString(), order);
+
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public Order addOrder(Order order) {

@@ -4,10 +4,7 @@ import com.av.flooringmastery.dto.Order;
 import com.av.flooringmastery.dto.Product;
 import com.av.flooringmastery.dto.Tax;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public interface FlooringMasteryDao {
 
@@ -16,6 +13,11 @@ public interface FlooringMasteryDao {
     List<Order> getAllOrders();
     Order getOrder(Product product);
     Order removeOrder(Product product);
+
+
+    LinkedHashMap<String, Order> getOrdersByDate();
+
+    void setOrdersByDate(String dateInput);
 
     List<String> listOfOrders(String date) throws FlooringMasteryNoSuchFileException, FlooringMasteryFileException;
 
