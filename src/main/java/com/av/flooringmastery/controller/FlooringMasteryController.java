@@ -74,7 +74,9 @@ public class FlooringMasteryController {
 
     private void displayOrders() {
         view.displayDisplayAllBanner();
+
         String dateInput = view.getOrderDate();
+
         try {
             List<String> listOfOrders = dao.listOfOrders(dateInput);
             view.displayAllOrderList(listOfOrders);
