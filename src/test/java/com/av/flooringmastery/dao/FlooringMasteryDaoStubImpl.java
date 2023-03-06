@@ -25,16 +25,18 @@ public class FlooringMasteryDaoStubImpl implements FlooringMasteryDao{
 
     @Override
     public Order addOrder(Order order) {
-        return null;
+        return onlyOrder;
     }
 
     @Override
     public List<Order> getAllOrders() {
-        return null;
+        List<Order> orderList = new ArrayList<>();
+        orderList.add(onlyOrder);
+        return orderList;
     }
 
     @Override
-    public List<String> listOfOrders(String date) throws FlooringMasteryException {
+    public List<String> listOfOrders(String date){
         return null;
     }
 
